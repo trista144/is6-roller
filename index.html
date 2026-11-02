@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="jieyuan" data-code="IS5">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="开局抽签">
-<meta name="description" content="明日方舟 集成战略「沉沦者的黑流树海」随机开局抽签：难度、分队、初始招募组合一把梭。">
+<meta name="description" content="明日方舟 集成战略 随机开局抽签：难度、分队、初始招募组合与干员禁选。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%230b1416'/%3E%3Crect x='3' y='3' width='26' height='26' rx='2' fill='none' stroke='%234fada6' stroke-width='1.5'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%238ef0df' font-family='monospace'%3E6%3C/text%3E%3C/svg%3E">
-<title>黑流树海 · 开局抽签</title>
+<title>集成战略 · 开局抽签</title>
 <style>
 /* =========================================================
  * 沉沦者的黑流树海 · 开局抽签
@@ -66,10 +66,10 @@ body {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(90rem 60rem at 78% -20%, rgba(38, 118, 110, .30), transparent 62%),
-    radial-gradient(70rem 50rem at 6% 110%, rgba(58, 34, 92, .22), transparent 60%),
-    radial-gradient(50rem 40rem at 50% 50%, rgba(10, 30, 30, .5), transparent 70%),
-    linear-gradient(180deg, #050a0b 0%, #070d0f 55%, #050909 100%);
+    radial-gradient(90rem 60rem at 78% -20%, var(--wash-1), transparent 62%),
+    radial-gradient(70rem 50rem at 6% 110%, var(--wash-2), transparent 60%),
+    radial-gradient(50rem 40rem at 50% 50%, var(--wash-3), transparent 70%),
+    var(--base-grad);
 }
 .backdrop::before {
   content: "";
@@ -100,7 +100,7 @@ body {
   margin: 0 auto;
   padding: 26px 30px 18px;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto auto 1fr auto;
   gap: 22px;
 }
 
@@ -125,7 +125,7 @@ body {
   align-items: baseline;
   gap: 1px;
   border: 1px solid var(--line-hot);
-  background: linear-gradient(150deg, rgba(79, 173, 166, .18), rgba(79, 173, 166, .02));
+  background: linear-gradient(150deg, var(--teal-soft-2), var(--teal-soft));
   color: var(--teal-hi);
   font-family: var(--mono);
   font-size: 13px;
@@ -172,7 +172,7 @@ h1 em {
   padding: 0 12px;
   border: 1px solid var(--line);
   border-radius: 2px;
-  background: rgba(255, 255, 255, .02);
+  background: var(--lift);
   color: var(--muted);
   font-family: inherit;
   font-size: 12.5px;
@@ -191,7 +191,7 @@ h1 em {
 .ghost-btn:hover {
   color: var(--teal-hi);
   border-color: var(--line-hot);
-  background: rgba(79, 173, 166, .08);
+  background: var(--teal-soft);
 }
 .ghost-btn:active { transform: translateY(1px); }
 
@@ -244,7 +244,7 @@ h1 em {
   border-radius: 3px;
   background:
     radial-gradient(120% 90% at 50% -20%, var(--accent-soft), transparent 66%),
-    linear-gradient(165deg, rgba(23, 40, 42, .92) 0%, rgba(10, 17, 19, .96) 58%, rgba(7, 12, 13, .98) 100%);
+    linear-gradient(165deg, var(--slot-a) 0%, var(--slot-b) 58%, var(--slot-c) 100%);
   overflow: hidden;
   transition: border-color .3s var(--ease), box-shadow .3s var(--ease);
   --accent: #4fada6;
@@ -411,7 +411,7 @@ h1 em {
 .gauge i {
   flex: 1;
   border-radius: 1px;
-  background: rgba(126, 198, 188, .13);
+  background: var(--gauge);
   transition: background .3s var(--ease), box-shadow .3s var(--ease), transform .3s var(--ease);
 }
 .gauge i.on {
@@ -420,7 +420,7 @@ h1 em {
   transform: scaleY(1.12);
 }
 .gauge i.on.far { opacity: .55; }
-.gauge i.tick { background: rgba(126, 198, 188, .26); }
+.gauge i.tick { background: var(--gauge-2); }
 .gauge i.tick.on { background: var(--accent); }
 
 .cls-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
@@ -463,7 +463,7 @@ h1 em {
   border: 1px solid var(--line-hot);
   border-radius: 2px;
   background:
-    linear-gradient(100deg, rgba(79, 173, 166, .2), rgba(79, 173, 166, .05) 62%, rgba(79, 173, 166, .14));
+    linear-gradient(100deg, var(--teal-soft-2), var(--teal-soft) 62%, var(--teal-soft-2));
   color: var(--text);
   font-family: inherit;
   cursor: pointer;
@@ -475,11 +475,11 @@ h1 em {
   content: "";
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(115deg, rgba(142, 240, 223, .1) 0 1px, transparent 1px 9px);
+  background: repeating-linear-gradient(115deg, var(--teal-soft) 0 1px, transparent 1px 9px);
   opacity: 0;
   transition: opacity .25s var(--ease);
 }
-.roll-btn:hover { border-color: var(--teal-hi); box-shadow: 0 0 40px -12px rgba(79, 173, 166, .65); }
+.roll-btn:hover { border-color: var(--teal-hi); box-shadow: 0 0 40px -12px var(--teal); }
 .roll-btn:hover::before { opacity: 1; }
 .roll-btn:active { transform: translateY(1px); }
 .roll-btn:disabled { cursor: default; }
@@ -539,7 +539,7 @@ h1 em {
   padding: 11px 14px;
   border: 1px dashed var(--line);
   border-radius: 2px;
-  background: rgba(227, 195, 132, .04);
+  background: var(--gold-soft);
   font-size: 12.5px;
   color: #cbbd9d;
   animation: fade-up .35s var(--ease);
@@ -590,7 +590,7 @@ h1 em {
   width: min(430px, 94vw);
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #0b1416, #070c0d);
+  background: var(--drawer-bg);
   border-left: 1px solid var(--line-hot);
   transform: translateX(102%);
   visibility: hidden;
@@ -680,7 +680,7 @@ h1 em {
   padding: 8px 4px;
   border: 1px solid var(--line);
   border-radius: 2px;
-  background: rgba(255, 255, 255, .02);
+  background: var(--lift);
   color: var(--muted);
   font-family: inherit;
   font-size: 11.5px;
@@ -716,7 +716,7 @@ input[type="range"] {
   appearance: none;
   width: 100%;
   height: 3px;
-  background: linear-gradient(90deg, rgba(79, 173, 166, .55), rgba(126, 198, 188, .12));
+  background: linear-gradient(90deg, var(--teal), var(--line));
   border-radius: 2px;
   outline: none;
   cursor: pointer;
@@ -748,7 +748,7 @@ input[type="range"]::-moz-range-thumb {
   padding: 7px 10px;
   border: 1px solid var(--line);
   border-radius: 2px;
-  background: rgba(255, 255, 255, .025);
+  background: var(--lift-2);
   color: var(--text);
   font-family: inherit;
   font-size: 12px;
@@ -813,7 +813,7 @@ input[type="range"]::-moz-range-thumb {
   flex: 0 0 40px;
   border: 1px solid var(--line);
   border-radius: 22px;
-  background: rgba(255, 255, 255, .04);
+  background: var(--lift-3);
   position: relative;
   transition: all .2s var(--ease);
 }
@@ -866,7 +866,7 @@ input[type="range"]::-moz-range-thumb {
   flex-direction: column;
   border: 1px solid var(--line-hot);
   border-radius: 3px;
-  background: linear-gradient(180deg, #0c1618, #080e0f);
+  background: var(--card-bg);
   box-shadow: 0 40px 90px -40px #000;
   animation: pop .3s var(--ease);
 }
@@ -933,7 +933,7 @@ input[type="range"]::-moz-range-thumb {
   padding: 10px 18px;
   border: 1px solid var(--line-hot);
   border-radius: 2px;
-  background: #0d1a1c;
+  background: var(--toast-bg);
   color: var(--teal-hi);
   font-size: 12.5px;
   letter-spacing: .05em;
@@ -1009,7 +1009,7 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 3px;
   padding: 12px 14px 13px;
   background:
-    linear-gradient(120deg, rgba(200, 72, 90, .07), rgba(13, 22, 24, .55) 55%);
+    linear-gradient(120deg, var(--danger-soft), var(--lift) 55%);
   animation: fade-up .35s var(--ease);
 }
 .bans-head {
@@ -1055,7 +1055,7 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 0 8px rgba(207, 90, 103, .7);
 }
 .ban-class { font-size: 10px; letter-spacing: .1em; color: rgba(255, 255, 255, .52); }
-.ban-name { color: #ffdde1; }
+.ban-name { color: var(--danger-text); }
 .ban-item.empty { opacity: .4; }
 .ban-item.empty .ban-name { color: var(--muted); }
 .ban-item.empty .ban-dot { background: var(--muted-2); box-shadow: none; }
@@ -1095,12 +1095,6 @@ input[type="range"]::-moz-range-thumb {
   font-size: 10px;
   color: var(--muted-2);
 }
-.pool-op.elig {
-  border-color: rgba(207, 90, 103, .42);
-  background: rgba(200, 72, 90, .08);
-  color: #ffdde1;
-}
-.pool-op.noelig { opacity: .38; }
 .pool-empty { font-size: 12.5px; color: var(--muted-2); padding: 16px 0; }
 
 /* 识别说明 */
@@ -1124,6 +1118,182 @@ input[type="range"]::-moz-range-thumb {
   .bans-list { gap: 5px; }
   .ban-item { padding: 5px 8px; font-size: 11.5px; }
 }
+/* ================= 主题变量 ================= */
+:root {
+  --lift: rgba(255, 255, 255, .02);
+  --lift-2: rgba(255, 255, 255, .025);
+  --lift-3: rgba(255, 255, 255, .04);
+  --teal-soft: rgba(79, 173, 166, .10);
+  --teal-soft-2: rgba(79, 173, 166, .18);
+  --gold-soft: rgba(227, 195, 132, .04);
+  --danger-soft: rgba(200, 72, 90, .07);
+  --danger-text: #ffdde1;
+  --gauge: rgba(126, 198, 188, .13);
+  --gauge-2: rgba(126, 198, 188, .26);
+  --slot-a: rgba(23, 40, 42, .92);
+  --slot-b: rgba(10, 17, 19, .96);
+  --slot-c: rgba(7, 12, 13, .98);
+  --drawer-bg: linear-gradient(180deg, #0b1416, #070c0d);
+  --card-bg: linear-gradient(180deg, #0c1618, #080e0f);
+  --toast-bg: #0d1a1c;
+  --wash-1: rgba(38, 118, 110, .30);
+  --wash-2: rgba(58, 34, 92, .22);
+  --wash-3: rgba(10, 30, 30, .5);
+  --base-grad: linear-gradient(180deg, #050a0b, #070d0f 55%, #050909);
+}
+
+/* 岁的界园志异：粉 + 翠绿 + 米白 */
+html[data-theme="jieyuan"] {
+  --bg: #f6efe5;
+  --bg-2: #fdf8f1;
+  --panel: #fffdf9;
+  --panel-2: #fdf6ee;
+  --line: rgba(150, 100, 120, .22);
+  --line-soft: rgba(150, 100, 120, .12);
+  --line-hot: rgba(47, 143, 125, .55);
+  --text: #2f2430;
+  --muted: #7d6a74;
+  --muted-2: #9c8a93;
+  --teal: #2f8f7d;
+  --teal-hi: #c34f74;
+  --gold: #b98a3e;
+  --red: #c33f5c;
+  --purple: #8a4b8f;
+  --lift: rgba(120, 80, 100, .045);
+  --lift-2: rgba(120, 80, 100, .06);
+  --lift-3: rgba(120, 80, 100, .09);
+  --teal-soft: rgba(47, 143, 125, .10);
+  --teal-soft-2: rgba(195, 79, 116, .14);
+  --gold-soft: rgba(185, 138, 62, .10);
+  --danger-soft: rgba(195, 79, 116, .07);
+  --danger-text: #a8324f;
+  --gauge: rgba(150, 100, 120, .16);
+  --gauge-2: rgba(150, 100, 120, .30);
+  --slot-a: rgba(255, 253, 249, .96);
+  --slot-b: rgba(253, 246, 238, .97);
+  --slot-c: rgba(250, 240, 231, .98);
+  --drawer-bg: linear-gradient(180deg, #fffaf3, #f6ece1);
+  --card-bg: linear-gradient(180deg, #fffdf9, #f8efe4);
+  --toast-bg: #fffdf9;
+  --wash-1: rgba(195, 79, 116, .13);
+  --wash-2: rgba(47, 143, 125, .12);
+  --wash-3: rgba(255, 255, 255, .55);
+  --base-grad: linear-gradient(180deg, #fdf8f1, #f7efe4 55%, #f1e6d9);
+}
+
+html[data-theme="jieyuan"] .slot { --accent: #2f8f7d; --accent-soft: rgba(47, 143, 125, .10); }
+html[data-theme="jieyuan"] .detail,
+html[data-theme="jieyuan"] .how-body { color: #5f4e58; }
+html[data-theme="jieyuan"] .extras { color: #7a6350; }
+html[data-theme="jieyuan"] .cls { color: #2f8f7d; border-color: rgba(47, 143, 125, .35); }
+html[data-theme="jieyuan"] .chip[aria-pressed="true"] { color: #2f8f7d; border-color: rgba(47, 143, 125, .45); }
+html[data-theme="jieyuan"] .lock-btn[aria-pressed="true"] { color: #c34f74; }
+html[data-theme="jieyuan"] .roll-btn { box-shadow: 0 0 34px -18px rgba(195, 79, 116, .55); }
+html[data-theme="jieyuan"] .toast { color: #2f8f7d; }
+html[data-theme="jieyuan"] .backdrop::before {
+  background-image:
+    linear-gradient(to right, rgba(150, 100, 120, .07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(150, 100, 120, .07) 1px, transparent 1px);
+}
+html[data-theme="jieyuan"] .backdrop::after { background: linear-gradient(90deg, transparent, rgba(195, 79, 116, .45), transparent); }
+
+/* ================= 主题切换 ================= */
+.theme-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -4px;
+}
+.theme-tab {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 13px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--lift);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12.5px;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: all .18s var(--ease);
+}
+.theme-tab:hover { border-color: var(--line-hot); color: var(--text); }
+.theme-tab.on {
+  border-color: var(--teal);
+  color: var(--teal);
+  background: var(--teal-soft);
+  box-shadow: inset 0 -2px 0 var(--teal);
+}
+.tt-code { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; opacity: .7; }
+.tt-name { font-weight: 500; }
+
+/* ================= 干员池 ================= */
+.pool-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 20px 0;
+}
+.pool-search {
+  flex: 1 1 160px;
+  min-width: 120px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--lift);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12.5px;
+  outline: none;
+  transition: border-color .18s var(--ease);
+}
+.pool-search::placeholder { color: var(--muted-2); }
+.pool-search:focus { border-color: var(--teal); }
+.pool-tools button {
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--lift);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: all .16s var(--ease);
+}
+.pool-tools button:hover { color: var(--teal); border-color: var(--line-hot); }
+
+.pool-op { cursor: pointer; font-family: inherit; transition: all .14s var(--ease); }
+.pool-op.held {
+  border-color: rgba(47, 143, 125, .45);
+  background: var(--teal-soft);
+  color: var(--text);
+}
+.pool-op.notheld {
+  opacity: .34;
+  text-decoration: line-through;
+  text-decoration-color: rgba(195, 79, 116, .7);
+}
+.pool-op:hover { border-color: var(--line-hot); }
+
+.hist-main em {
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: .1em;
+  color: var(--teal);
+  margin-right: 2px;
+}
+
+@media (max-width: 560px) {
+  .theme-tabs { gap: 6px; }
+  .theme-tab { padding: 6px 10px; font-size: 11.5px; }
+  .pool-tools { padding: 8px 14px 0; }
+}
+/* 界园：浅色下遮罩别太重 */
+html[data-theme="jieyuan"] .scrim { background: rgba(90, 60, 70, .38); }
+html[data-theme="jieyuan"] .modal { background: rgba(90, 60, 70, .42); }
+html[data-theme="jieyuan"] .tag { color: #8a7178; border-color: rgba(150, 100, 120, .28); }
 </style>
 </head>
 <body>
@@ -1135,11 +1305,11 @@ input[type="range"]::-moz-range-thumb {
   <header class="topbar">
     <div class="brand">
       <div class="badge">
-        <span>IS</span><span class="badge-num">6</span>
+        <span>IS</span><span class="badge-num" id="brandCode">5</span>
       </div>
       <div class="brand-text">
-        <p class="eyebrow">THE BLACK FLOW OF THE DROWNING SEEKERS</p>
-        <h1>黑流树海 <em>开局抽签</em></h1>
+        <p class="eyebrow">INTEGRATED STRATEGIES · START ROLLER</p>
+        <h1>开局抽签 <em id="brandName">界园</em></h1>
       </div>
     </div>
 
@@ -1158,6 +1328,8 @@ input[type="range"]::-moz-range-thumb {
       </button>
     </nav>
   </header>
+
+  <nav class="theme-tabs" id="themeTabs" aria-label="选择主题"></nav>
 
   <main class="stage" id="stage" aria-live="polite">
 
@@ -1179,10 +1351,10 @@ input[type="range"]::-moz-range-thumb {
         </div>
         <div class="slot-main">
           <div class="big" id="v-difficulty">—</div>
-          <div class="sub" id="s-difficulty">保密等级</div>
+          <div class="sub" id="s-difficulty">难度</div>
         </div>
         <div class="gauge" id="gauge" aria-hidden="true"></div>
-        <p class="detail" id="d-difficulty">按下「抽签」，让黑流替你做决定。</p>
+        <p class="detail" id="d-difficulty">按下「抽签」，让岁替你做决定。</p>
       </article>
 
       <article class="slot" data-slot="squad">
@@ -1234,7 +1406,7 @@ input[type="range"]::-moz-range-thumb {
     <section class="bans" id="banPanel" hidden>
       <div class="bans-head">
         <span class="bans-title">干员禁选</span>
-        <span class="bans-sub" id="banSub">每个职业 1 名 · 来自你的 box</span>
+        <span class="bans-sub" id="banSub">每个职业 1 名 · 来自你的干员池</span>
       </div>
       <ul class="bans-list" id="banList"></ul>
     </section>
@@ -1244,7 +1416,7 @@ input[type="range"]::-moz-range-thumb {
   <footer class="footer">
     <span id="seedLine" class="mono">编号 —</span>
     <span class="sep">/</span>
-    <span id="versionLine">沉沦者开局抽签 v0.1</span>
+    <span id="versionLine">集成战略开局抽签</span>
     <span class="sep">/</span>
     <span>数据参考 PRTS</span>
   </footer>
@@ -1268,28 +1440,28 @@ input[type="range"]::-moz-range-thumb {
   <div class="drawer-body">
 
     <section class="fgroup">
-      <h3>难度区间</h3>
+      <h3>难度区间 <span class="tag" id="diffLabelText">请君入园</span></h3>
       <div class="preset-row" id="presetRow">
         <button type="button" data-preset="easy">休闲 ≤6</button>
         <button type="button" data-preset="std">标准 ≤12</button>
         <button type="button" data-preset="hard">硬核 ≥10</button>
-        <button type="button" data-preset="all">全部 0–16</button>
+        <button type="button" data-preset="all">全部 0–<span id="diffPresetMax">18</span></button>
       </div>
 
       <div class="range-row">
         <label for="rngMin">最低 <output id="outMin">0</output></label>
-        <input type="range" id="rngMin" min="0" max="16" step="1" value="0">
+        <input type="range" id="rngMin" min="0" max="18" step="1" value="0">
       </div>
       <div class="range-row">
         <label for="rngMax">最高 <output id="outMax">12</output></label>
-        <input type="range" id="rngMax" min="0" max="16" step="1" value="12">
+        <input type="range" id="rngMax" min="0" max="18" step="1" value="12">
       </div>
-      <p class="hint" id="diffHint">共 17 级（保密等级 0 – 16），区间内等概率。</p>
+      <p class="hint" id="diffHint">区间内等概率。</p>
     </section>
 
     <section class="fgroup">
       <h3>分队 <span class="count" id="squadCount"></span></h3>
-      <p class="hint">点亮 = 参与抽签；点暗 = 排除。默认排除「矛头分队」。</p>
+      <p class="hint">点亮 = 参与抽签；点暗 = 排除。</p>
       <div class="chips" id="squadChips"></div>
       <div class="chip-tools">
         <button type="button" data-chip="all">全选</button>
@@ -1328,17 +1500,17 @@ input[type="range"]::-moz-range-thumb {
         <span class="track" aria-hidden="true"><span class="knob"></span></span>
         <span class="switch-text">每个职业禁选 1 名六星</span>
       </label>
-      <p class="hint" id="boxStatus">尚未识别 box。</p>
+      <p class="hint" id="boxStatus">—</p>
 
       <div class="range-row">
         <label for="rngBanLv">最低等级 <output id="outBanLv">2</output></label>
         <input type="range" id="rngBanLv" min="0" max="6" step="1" value="1">
       </div>
-      <p class="hint">干员列表不显示精英化阶段，只能用等级近似：LV1 视为未精英化，≥2 视为精英一以上。想更严格就调高。</p>
+      <p class="hint">干员列表不显示精英化阶段，只能用等级近似：LV1 视为未精英化，≥2 视为精英一以上。默认 box 没有等级，全部按达标处理。</p>
 
       <div class="chips" id="banClassChips"></div>
       <div class="chip-tools">
-        <button type="button" id="btnOpenPool">查看识别名单</button>
+        <button type="button" id="btnOpenPool">管理干员池</button>
         <button type="button" id="btnBanHelp">怎么识别？</button>
       </div>
     </section>
@@ -1355,7 +1527,7 @@ input[type="range"]::-moz-range-thumb {
   </div>
 </aside>
 
-<!-- ================= 记录弹层 ================= -->
+<!-- ================= 抽签记录 ================= -->
 <div class="modal" id="historyModal" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-label="抽签记录">
     <div class="modal-head">
@@ -1372,21 +1544,27 @@ input[type="range"]::-moz-range-thumb {
   </div>
 </div>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-<!-- ================= 识别名单 ================= -->
+<!-- ================= 干员池 ================= -->
 <div class="modal" id="poolModal" hidden>
-  <div class="modal-card modal-card-wide" role="dialog" aria-modal="true" aria-label="识别名单">
+  <div class="modal-card modal-card-wide" role="dialog" aria-modal="true" aria-label="干员池">
     <div class="modal-head">
       <div>
-        <p class="eyebrow">BOX SCAN</p>
-        <h2>识别名单</h2>
+        <p class="eyebrow">OPERATOR POOL</p>
+        <h2>干员池</h2>
       </div>
       <button class="icon-btn" id="btnClosePool" type="button" aria-label="关闭">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
     <p class="modal-hint" id="poolHint">—</p>
+
+    <div class="pool-tools">
+      <input type="search" id="poolSearch" class="pool-search" placeholder="搜索干员名…" autocomplete="off">
+      <button type="button" id="poolAll">全选</button>
+      <button type="button" id="poolNone">全不选</button>
+      <button type="button" id="poolReset">按识别结果</button>
+    </div>
+
     <div class="pool-body" id="poolBody"></div>
   </div>
 </div>
@@ -1396,140 +1574,52 @@ input[type="range"]::-moz-range-thumb {
   <div class="modal-card" role="dialog" aria-modal="true" aria-label="怎么识别">
     <div class="modal-head">
       <div>
-        <p class="eyebrow">HOW TO SCAN</p>
-        <h2>怎么把 box 读进来</h2>
+        <p class="eyebrow">OPTIONAL</p>
+        <h2>截图识别（可选）</h2>
       </div>
       <button class="icon-btn" id="btnCloseHow" type="button" aria-label="关闭">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
     <div class="how-body">
+      <p><b>不识别也能用。</b>干员池默认包含全部六星，你只要在「管理干员池」里取消没有 / 没练的就行。</p>
+      <p>想让禁选更准确（带上等级），再走截图识别：</p>
       <ol>
-        <li>手机或 PC 打开游戏 <b>干员</b> 列表，把六星所在的部分<b>滚动截屏</b>，尽量一屏 8 个、两行。</li>
-        <li>把截图丢进程序目录的 <code>screenshots</code> 文件夹。</li>
-        <li>双击 <code>识别box.bat</code>（或运行 <code>python tools/recognize_box.py</code>）。</li>
-        <li>回来刷新本页面，约束面板里就会显示识别到的干员。</li>
+        <li>游戏里打开 <b>干员</b> 列表，把六星所在部分滚动截屏；</li>
+        <li>截图放进程序目录的 <code>screenshots</code> 文件夹；</li>
+        <li>双击 <code>识别box.bat</code>（或运行 <code>python tools/recognize_box.py</code>）；</li>
+        <li>回来刷新页面，干员池会自动按识别结果初始化。</li>
       </ol>
-      <p class="hint">识别用的是 Windows 自带的离线 OCR，不上传任何图片。名字认错会自动对照干员表纠正；认不出的卡不会进入禁选池，所以名单里缺人可以再补一张截图重新识别。</p>
-      <p class="hint">这一步需要 <b>Windows 电脑 + Python 3</b>；手机端暂时做不了。想在手机上抽签（含禁选），可以让跑过识别的电脑生成「我的 box」单文件版，把那个 HTML 发到手机。</p>
+      <p class="hint">识别用 Windows 自带的离线 OCR，不上传图片。需要 Windows 电脑 + Python 3，手机端暂时做不了。</p>
     </div>
   </div>
 </div>
 
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <script>
 /* =========================================================
- * 沉沦者的黑流树海 · 开局抽签  —— 数据层
+ * 集成战略 · 开局抽签  —— 数据层（多主题版）
  * 想改内容只需要动这个文件，改完刷新页面即可。
- * 数据参考：PRTS「沉沦者的黑流树海」页面（2026-11 抓取）
+ * 数据参考：PRTS（2026-11 抓取）
  * --------------------------------------------------------- */
 
 window.GAME_DATA = {
   meta: {
-    theme: "沉沦者的黑流树海",
-    en: "THE BLACK FLOW OF THE DROWNING SEEKERS",
-    code: "IS6",
-    version: "v0.2 原型",
-    maxDifficulty: 16,
+    version: "v0.3 原型",
   },
 
   /* 八大职业（顺序与游戏内一致） */
   classes: ["先锋", "近卫", "重装", "狙击", "术师", "医疗", "辅助", "特种"],
 
-  /* 保密等级 0 – 16  -------------------------------------------------- */
-  difficulties: [
-    { v: 0,  desc: "敌人生命 -40%、攻击 -30%；初始生命上限更高，失败返还【特勤任务影像】", enemy: "—",  score: 0  },
-    { v: 1,  desc: "初始生命上限 -2；敌人生命 / 攻击 -20%",                            enemy: "—",  score: 5  },
-    { v: 2,  desc: "实托邦开始生成；敌人生命 / 攻击 -15%",                             enemy: "—",  score: 10 },
-    { v: 3,  desc: "1 个【险路尽头】不再提前揭示；敌人生命 / 攻击 -10%",               enemy: "—",  score: 15 },
-    { v: 4,  desc: "出现【“居民”据点】；失败不再返还收藏品",                            enemy: "—",  score: 20 },
-    { v: 5,  desc: "所有敌人最大生命 +30%",                                            enemy: "+1", score: 25 },
-    { v: 6,  desc: "实托邦生成更频繁，并获得【实托邦·方针】效果",                       enemy: "+2", score: 30 },
-    { v: 7,  desc: "零件箱初始容量 -2",                                                enemy: "+3", score: 35 },
-    { v: 8,  desc: "精英及领袖敌人攻击力 +15%",                                        enemy: "+5", score: 40 },
-    { v: 9,  desc: "进入下一区域时损失 10% 源石锭",                                     enemy: "+6", score: 45 },
-    { v: 10, desc: "可同时部署人数 -1；初始生命上限 -2",                                enemy: "+7", score: 50 },
-    { v: 11, desc: "领袖敌人受到的伤害降低 20%",                                        enemy: "+8", score: 50 },
-    { v: 12, desc: "实托邦影响范围扩大，生成概率进一步提升",                            enemy: "+10", score: 50 },
-    { v: 13, desc: "非初始五星干员希望 +1；玻利瓦尔防御力 +50%；未熄之地额外灼燃",      enemy: "+12", score: 50 },
-    { v: 14, desc: "猎犬 proto 进点行动力 -1；源阶方生命 200%，全场每秒 -100 生命",     enemy: "+16", score: 50 },
-    { v: 15, desc: "非初始六星干员希望 +1；猎犬 proto 生命 150% 且为卡德霍回血",        enemy: "+20", score: 50 },
-    { v: 16, desc: "险路尽头不再获得加工品；行商刷新价格 +4",                           enemy: "+25", score: 50 },
-  ],
-  difficultyNote: "「内容拓展·Ⅰ」新增 16 级；11 级起为高难区，谨慎选择。",
-
-  /* 分队 --------------------------------------------------------------- */
-  squads: [
-    { id: "benyuan",  name: "本源研修分队", expansion: false, unlock: "初始解锁",
-      effect: "招募 / 进阶 4★ 以上【本源术师】【本源铁卫】【本源近卫】【巫役】希望 -2；初始携带【河谷祭祈】" },
-
-    { id: "wenming",  name: "文明开化分队", expansion: false, unlock: "生命游戏·羽毛",
-      effect: "消除实托邦中的理想源，获得 2 行动力 + 1 个随机收藏品；升级后不受【实托邦·方针】影响" },
-
-    { id: "kaituo",   name: "开拓者分队", expansion: false, unlock: "生命游戏·蹄",
-      effect: "初始携带 1 个（升级后为稀有的）加工品；进入新区域时获得 1 个随机加工品或概念体" },
-
-    { id: "duobian",  name: "多边贸易分队", expansion: false, unlock: "生命游戏·鳃",
-      effect: "零件箱容量 +2；同一行商节点卖出 3 个零件后获得 8 源石锭；进入行商节点获得【枯苔藓球】" },
-
-    { id: "dizhi",    name: "地质调查分队", expansion: false, unlock: "初始解锁",
-      effect: "初始携带【黑流树海笔记】，可通过探访不同类型的节点提升战斗后收藏品掉落概率" },
-
-    { id: "zhihui",   name: "指挥分队", expansion: false, unlock: "初始解锁",
-      effect: "目标生命上限 +2；每次战斗结束额外回复 1 目标生命（3+ 难度下护盾低于 5 时 +1 护盾）" },
-
-    { id: "teqin",    name: "特勤分队", expansion: false, unlock: "初始解锁",
-      effect: "可携带干员 +2、同时部署人数 +2；初始招募 5 名罗德岛预备干员（精 2 机械师后额外附带机械师）" },
-
-    { id: "houqin",   name: "后勤分队", expansion: false, unlock: "初始解锁",
-      effect: "初始源石锭 +20、希望 +2（6+ 难度额外携带【多生苔藓】）" },
-
-    { id: "maotou",   name: "矛头分队", expansion: false, unlock: "初始解锁",
-      effect: "初始目标生命值变为 1；所有我方单位攻 / 防 / 生命 +15%（9+ 难度携带【时光之末】）" },
-
-    { id: "tuji",     name: "突击战术分队", expansion: false, unlock: "近卫 / 先锋合计 ≥ 5 名通关结局",
-      effect: "招募 / 进阶 4★ 以上【近卫】【先锋】希望 -2 / -1；首个该职业干员必定直升" },
-
-    { id: "baolei",   name: "堡垒战术分队", expansion: false, unlock: "重装 / 辅助合计 ≥ 5 名通关结局",
-      effect: "招募 / 进阶 4★ 以上【重装】【辅助】希望 -2 / -1；首个该职业干员必定直升" },
-
-    { id: "yuancheng",name: "远程战术分队", expansion: false, unlock: "医疗 / 狙击合计 ≥ 5 名通关结局",
-      effect: "招募 / 进阶 4★ 以上【医疗】【狙击】希望 -2 / -1；首个该职业干员必定直升" },
-
-    { id: "pohuai",   name: "破坏战术分队", expansion: false, unlock: "术师 / 特种合计 ≥ 5 名通关结局",
-      effect: "招募 / 进阶 4★ 以上【术师】【特种】希望 -2 / -1；首个该职业干员必定直升" },
-
-    { id: "gaotai",   name: "高台突破分队", expansion: false, unlock: "高台合计 ≥ 4 名通关结局",
-      effect: "招募 4★ 及以上【术师】【狙击】【医疗】【辅助】希望 -2" },
-
-    { id: "dimian",   name: "地面突破分队", expansion: false, unlock: "地面合计 ≥ 4 名通关结局",
-      effect: "招募 4★ 及以上【先锋】【近卫】【重装】【特种】希望 -2" },
-
-    { id: "tuanjie",  name: "团结阵线分队", expansion: true, unlock: "内容拓展Ⅰ + 完成一次结局",
-      effect: "应急助力刷新不再消耗源石锭；初始携带【似曾相识棋盒】；同时部署 +1，进新区获得应急干员" },
-
-    { id: "tazhu",    name: "踏足遍历分队", expansion: true, unlock: "内容拓展Ⅰ + 完成一次结局",
-      effect: "使用加工品移动后随机揭露 3 处节点视野；初始携带【去踏足】；本区域视野全开则获得源石锭" },
-  ],
-
-  /* 初始招募组合 -------------------------------------------------------- */
-  combos: [
-    { id: "xianshou", name: "先手必胜", classes: ["先锋", "狙击", "特种"], desc: "开局即施压，费用、位移与飞行单位处理一手抓" },
-    { id: "wenza",    name: "稳扎稳打", classes: ["重装", "术师", "狙击"], desc: "有坦有输出，最百搭的攻守配置" },
-    { id: "quchang",  name: "取长补短", classes: ["近卫", "辅助", "医疗"], desc: "近卫扛线，辅助与医疗负责续航和控制" },
-    { id: "linghuo",  name: "灵活部署", classes: ["先锋", "辅助", "特种"], desc: "费用、位移、控制拉满，吃操作上限" },
-    { id: "jianbu",   name: "坚不可摧", classes: ["重装", "术师", "医疗"], desc: "铁壁防线流，慢热但稳" },
-    { id: "suixin",   name: "随心所欲", classes: [], locked: true,
-      desc: "第一张必为 5★ 临时招募券，后两张从地面 / 高台职业中随机" },
-  ],
-
-  /* 随心所欲：第二 / 第三张券的可能职业 ---------------------------------- */
+  /* 随心所欲：第二 / 第三张券的可能职业（各主题通用规则） */
   suixinPool: {
     second: ["先锋", "近卫", "重装", "特种"],
     third:  ["狙击", "术师", "医疗", "辅助"],
     first:  "5★ 临时",
   },
 
-  /* 附加调味（房规，可选） ----------------------------------------------- */
+  /* 附加调味（房规，可选） */
   houseRules: [
     "全程不使用助战干员",
     "初始招募不选六星干员",
@@ -1540,13 +1630,196 @@ window.GAME_DATA = {
     "全程不使用战术道具",
     "每层至少触发 1 次【狭路相逢】",
   ],
+
+  /* =======================================================
+   * 主题
+   * ======================================================= */
+  themes: [
+
+    /* ---------------- 岁的界园志异 ---------------- */
+    {
+      id: "jieyuan",
+      code: "IS5",
+      name: "岁的界园志异",
+      short: "界园",
+      en: "SUI'S GARDEN OF GROTESQUERIES",
+      css: "jieyuan",
+      diffLabel: "请君入园",
+      diffNote: "「内容拓展·Ⅱ」追加到 18 级；11 级起为高难区。",
+      maxDifficulty: 18,
+      defaultDiff: [0, 12],
+      defaultExcludeSquads: [],
+      defaultExcludeCombos: ["suixin"],
+
+      difficulties: [
+        { v: 0,  desc: "初始生命上限更高；岁兽残识敌人极弱；全敌生命 / 攻击 -20%（仅本难度）", enemy: "—",  score: 0  },
+        { v: 1,  desc: "初始生命上限 -2；全敌生命 / 攻击 -10%",                        enemy: "—",  score: 5  },
+        { v: 2,  desc: "岁时的影响更加强大",                                            enemy: "—",  score: 10 },
+        { v: 3,  desc: "初始钱盒加入 3 枚大炎通宝，钱盒容量 7 → 10",                      enemy: "—",  score: 15 },
+        { v: 4,  desc: "【便符】与【受符】生命 +50%，其余敌人生命 +40%",                  enemy: "+1", score: 20 },
+        { v: 5,  desc: "所有敌人受到物理与法术伤害 -10%",                                enemy: "+2", score: 25 },
+        { v: 6,  desc: "岁时效果提升至「真切」并出现新的岁时",                            enemy: "+3", score: 30 },
+        { v: 7,  desc: "初始大炎通宝换成四厉煞；岁兽残识中的敌人不再虚弱",                enemy: "+4", score: 35 },
+        { v: 8,  desc: "招募五星希望 +1；精英与领袖防御、生命 +20%",                      enemy: "+5", score: 40 },
+        { v: 9,  desc: "岁兽残识作战数量增加；可同时部署人数 -1",                          enemy: "+6", score: 45 },
+        { v: 10, desc: "【受符】干员攻击 -50%；初始生命上限 -2",                          enemy: "+7", score: 50 },
+        { v: 11, desc: "留存招募券 -2；所有敌人攻击 +20%",                                enemy: "+10", score: 50 },
+        { v: 12, desc: "岁时效果提升至「入髓」；刷新商店 / 重新投钱票券消耗 +1",           enemy: "+11", score: 50 },
+        { v: 13, desc: "雕伥生命 +50%；「易」切换晦明后的屏障提升至 150%",                enemy: "+12", score: 50 },
+        { v: 14, desc: "领袖受伤 -20%；「岁」「岁躯」攻击 +50%；拍击退场再部署 90 秒",     enemy: "+13", score: 50 },
+        { v: 15, desc: "招募六星希望 +1；受符半径 +0.8 并附加灼燃；「瑕」攻 / 命 +50%",    enemy: "+15", score: 50 },
+        { v: 16, desc: "全敌攻速 +20；后兽生命 200%、矩兽攻击 200%",                      enemy: "+18", score: 50 },
+        { v: 17, desc: "领袖攻击 +20%；指点迷津招募 / 进阶希望减为 1；宿傲宿怒 +1",        enemy: "+21", score: 50 },
+        { v: 18, desc: "重新投钱票券急剧增加；第四层起出现额外敌人；朔壳闪避非阻挡伤害",    enemy: "+25", score: 50 },
+      ],
+
+      squads: [
+        { id: "gaotai",  name: "高台突破分队", exp: 0, unlock: "高台合计 ≥ 4 名通关结局",
+          effect: "招募 4★ 及以上【术师】【狙击】【医疗】【辅助】希望 -2" },
+        { id: "dimian",  name: "地面突破分队", exp: 0, unlock: "地面合计 ≥ 4 名通关结局",
+          effect: "招募 4★ 及以上【先锋】【近卫】【重装】【特种】希望 -2" },
+        { id: "youke",   name: "游客分队", exp: 0, unlock: "古今学识·《须知篇》",
+          effect: "钱盒容量 +1（升级 +2），票券 +3（+4），投钱时额外投出 1（升级 2/3）枚通宝" },
+        { id: "sisuitai",name: "司岁台分队", exp: 0, unlock: "古今学识·《制烛篇》",
+          effect: "留存招募券上限 +1（+2/+3）；每进入新一层未满则获得随机招募券留存" },
+        { id: "tianshi", name: "天师府分队", exp: 0, unlock: "古今学识·《设园通鉴》",
+          effect: "第二、四层进入岁兽残识时剩余烛火 +1（升级为每次）；可在安全的角落进入岁兽残识" },
+        { id: "zhihui",  name: "指挥分队", exp: 0, unlock: "初始解锁",
+          effect: "目标生命上限 +2（升级 +4）；每次战斗后回复 1 目标生命；初始携带「时光之末」" },
+        { id: "teqin",   name: "特勤分队", exp: 0, unlock: "初始解锁",
+          effect: "可携带干员 +2、同时部署人数 +2；初始招募 5 名罗德岛预备干员及电弧" },
+        { id: "houqin",  name: "后勤分队", exp: 0, unlock: "初始解锁",
+          effect: "初始源石锭 +20、希望 +2；6+ 难度初始携带通宝「茧成绢」" },
+        { id: "tuji",    name: "突击战术分队", exp: 0, unlock: "近卫 / 先锋合计 ≥ 5 名通关结局",
+          effect: "招募 / 进阶 4★ 以上【近卫】【先锋】希望 -1；首个该职业干员必定直升" },
+        { id: "baolei",  name: "堡垒战术分队", exp: 0, unlock: "重装 / 辅助合计 ≥ 5 名通关结局",
+          effect: "招募 / 进阶 4★ 以上【重装】【辅助】希望 -1；首个该职业干员必定直升" },
+        { id: "yuancheng",name: "远程战术分队", exp: 0, unlock: "医疗 / 狙击合计 ≥ 5 名通关结局",
+          effect: "招募 / 进阶 4★ 以上【医疗】【狙击】希望 -1；首个该职业干员必定直升" },
+        { id: "pohuai",  name: "破坏战术分队", exp: 0, unlock: "术师 / 特种合计 ≥ 5 名通关结局",
+          effect: "招募 / 进阶 4★ 以上【术师】【特种】希望 -1；首个该职业干员必定直升" },
+        { id: "gaoguige",name: "高规格分队", exp: 0, unlock: "初始解锁",
+          effect: "初始招募额外获得 1 张随机精锐招募券；9+ 难度下 4★ / 5★ 招募直升" },
+        { id: "huatuan", name: "花团锦簇分队", exp: 1, unlock: "内容拓展Ⅰ + 累计重新投钱 10 次",
+          effect: "筹谋消耗目标生命固定为 1；投钱时至少 1 枚花钱则获得 1 票券；初始通宝「初有文」" },
+        { id: "qixing",  name: "棋行险着分队", exp: 1, unlock: "内容拓展Ⅰ + 累计获取厉钱 20 次",
+          effect: "至少 1 枚厉钱被投出时作战更易出宝箱；初始「福祸相依」与通宝「梦奇物」" },
+        { id: "suiying", name: "岁影回音分队", exp: 1, unlock: "内容拓展Ⅰ + 完成一次结局",
+          effect: "随机获得一个变化过的其他分队效果（共 17 种组合）" },
+        { id: "daili",   name: "代理人分队", exp: 2, unlock: "内容拓展Ⅱ + 累计获得收藏品 10 次",
+          effect: "部分非战斗节点出现额外选项；非战斗 / 杂疑节点有概率使希望、生命上限、留存券或源石锭 +1" },
+        { id: "zhixue",  name: "知学分队", exp: 2, unlock: "内容拓展Ⅱ + 完成一次结局",
+          effect: "初始额外 1 张高级资深干员招募券并可购买；初始通宝「圣诏封神」" },
+        { id: "shanggu", name: "商贾分队", exp: 2, unlock: "内容拓展Ⅱ + 行商累计消费 20 源石锭",
+          effect: "交换通宝获得 3 源石锭；诡意行商必出纵向通路且价格 -50%；初始通宝「触锁代币」" },
+      ],
+
+      combos: [
+        { id: "xianshou", name: "先手必胜", classes: ["先锋", "狙击", "特种"], desc: "开局即施压，费用、位移与飞行单位处理一手抓" },
+        { id: "wenza",    name: "稳扎稳打", classes: ["重装", "术师", "狙击"], desc: "有坦有输出，最百搭的攻守配置" },
+        { id: "quchang",  name: "取长补短", classes: ["近卫", "辅助", "医疗"], desc: "近卫扛线，辅助与医疗负责续航和控制" },
+        { id: "linghuo",  name: "灵活部署", classes: ["先锋", "辅助", "特种"], desc: "费用、位移、控制拉满，吃操作上限" },
+        { id: "jianbu",   name: "坚不可摧", classes: ["重装", "术师", "医疗"], desc: "铁壁防线流，慢热但稳" },
+        { id: "suixin",   name: "随心所欲", classes: [], locked: true,
+          desc: "第一张必为 5★ 临时招募券，后两张从地面 / 高台职业中随机" },
+      ],
+    },
+
+    /* ---------------- 沉沦者的黑流树海 ---------------- */
+    {
+      id: "blackflow",
+      code: "IS6",
+      name: "沉沦者的黑流树海",
+      short: "黑流树海",
+      en: "THE BLACK FLOW OF THE DROWNING SEEKERS",
+      css: "blackflow",
+      diffLabel: "保密等级",
+      diffNote: "「内容拓展·Ⅰ」新增 16 级；11 级起为高难区，谨慎选择。",
+      maxDifficulty: 16,
+      defaultDiff: [0, 12],
+      defaultExcludeSquads: ["maotou"],
+      defaultExcludeCombos: ["suixin"],
+
+      difficulties: [
+        { v: 0,  desc: "敌人生命 -40%、攻击 -30%；初始生命上限更高，失败返还【特勤任务影像】", enemy: "—",  score: 0  },
+        { v: 1,  desc: "初始生命上限 -2；敌人生命 / 攻击 -20%",                            enemy: "—",  score: 5  },
+        { v: 2,  desc: "实托邦开始生成；敌人生命 / 攻击 -15%",                             enemy: "—",  score: 10 },
+        { v: 3,  desc: "1 个【险路尽头】不再提前揭示；敌人生命 / 攻击 -10%",               enemy: "—",  score: 15 },
+        { v: 4,  desc: "出现【“居民”据点】；失败不再返还收藏品",                            enemy: "—",  score: 20 },
+        { v: 5,  desc: "所有敌人最大生命 +30%",                                            enemy: "+1", score: 25 },
+        { v: 6,  desc: "实托邦生成更频繁，并获得【实托邦·方针】效果",                       enemy: "+2", score: 30 },
+        { v: 7,  desc: "零件箱初始容量 -2",                                                enemy: "+3", score: 35 },
+        { v: 8,  desc: "精英及领袖敌人攻击力 +15%",                                        enemy: "+5", score: 40 },
+        { v: 9,  desc: "进入下一区域时损失 10% 源石锭",                                     enemy: "+6", score: 45 },
+        { v: 10, desc: "可同时部署人数 -1；初始生命上限 -2",                                enemy: "+7", score: 50 },
+        { v: 11, desc: "领袖敌人受到的伤害降低 20%",                                        enemy: "+8", score: 50 },
+        { v: 12, desc: "实托邦影响范围扩大，生成概率进一步提升",                            enemy: "+10", score: 50 },
+        { v: 13, desc: "非初始五星干员希望 +1；玻利瓦尔防御力 +50%；未熄之地额外灼燃",      enemy: "+12", score: 50 },
+        { v: 14, desc: "猎犬 proto 进点行动力 -1；源阶方生命 200%，全场每秒 -100 生命",     enemy: "+16", score: 50 },
+        { v: 15, desc: "非初始六星干员希望 +1；猎犬 proto 生命 150% 且为卡德霍回血",        enemy: "+20", score: 50 },
+        { v: 16, desc: "险路尽头不再获得加工品；行商刷新价格 +4",                           enemy: "+25", score: 50 },
+      ],
+
+      squads: [
+        { id: "benyuan",  name: "本源研修分队", exp: 0, unlock: "初始解锁",
+          effect: "招募 / 进阶 4★ 以上【本源术师】【本源铁卫】【本源近卫】【巫役】希望 -2；初始携带【河谷祭祈】" },
+        { id: "wenming",  name: "文明开化分队", exp: 0, unlock: "生命游戏·羽毛",
+          effect: "消除实托邦中的理想源，获得 2 行动力 + 1 个随机收藏品；升级后不受【实托邦·方针】影响" },
+        { id: "kaituo",   name: "开拓者分队", exp: 0, unlock: "生命游戏·蹄",
+          effect: "初始携带 1 个（升级后为稀有的）加工品；进入新区域时获得 1 个随机加工品或概念体" },
+        { id: "duobian",  name: "多边贸易分队", exp: 0, unlock: "生命游戏·鳃",
+          effect: "零件箱容量 +2；同一行商节点卖出 3 个零件后获得 8 源石锭；进入行商节点获得【枯苔藓球】" },
+        { id: "dizhi",    name: "地质调查分队", exp: 0, unlock: "初始解锁",
+          effect: "初始携带【黑流树海笔记】，可通过探访不同类型的节点提升战斗后收藏品掉落概率" },
+        { id: "zhihui",   name: "指挥分队", exp: 0, unlock: "初始解锁",
+          effect: "目标生命上限 +2；每次战斗结束额外回复 1 目标生命（3+ 难度下护盾低于 5 时 +1 护盾）" },
+        { id: "teqin",    name: "特勤分队", exp: 0, unlock: "初始解锁",
+          effect: "可携带干员 +2、同时部署人数 +2；初始招募 5 名罗德岛预备干员（精 2 机械师后额外附带机械师）" },
+        { id: "houqin",   name: "后勤分队", exp: 0, unlock: "初始解锁",
+          effect: "初始源石锭 +20、希望 +2（6+ 难度额外携带【多生苔藓】）" },
+        { id: "maotou",   name: "矛头分队", exp: 0, unlock: "初始解锁",
+          effect: "初始目标生命值变为 1；所有我方单位攻 / 防 / 生命 +15%（9+ 难度携带【时光之末】）" },
+        { id: "tuji",     name: "突击战术分队", exp: 0, unlock: "近卫 / 先锋合计 ≥ 5 名通关结局",
+          effect: "招募 / 进阶 4★ 以上【近卫】【先锋】希望 -2 / -1；首个该职业干员必定直升" },
+        { id: "baolei",   name: "堡垒战术分队", exp: 0, unlock: "重装 / 辅助合计 ≥ 5 名通关结局",
+          effect: "招募 / 进阶 4★ 以上【重装】【辅助】希望 -2 / -1；首个该职业干员必定直升" },
+        { id: "yuancheng",name: "远程战术分队", exp: 0, unlock: "医疗 / 狙击合计 ≥ 5 名通关结局",
+          effect: "招募 / 进阶 4★ 以上【医疗】【狙击】希望 -2 / -1；首个该职业干员必定直升" },
+        { id: "pohuai",   name: "破坏战术分队", exp: 0, unlock: "术师 / 特种合计 ≥ 5 名通关结局",
+          effect: "招募 / 进阶 4★ 以上【术师】【特种】希望 -2 / -1；首个该职业干员必定直升" },
+        { id: "gaotai",   name: "高台突破分队", exp: 0, unlock: "高台合计 ≥ 4 名通关结局",
+          effect: "招募 4★ 及以上【术师】【狙击】【医疗】【辅助】希望 -2" },
+        { id: "dimian",   name: "地面突破分队", exp: 0, unlock: "地面合计 ≥ 4 名通关结局",
+          effect: "招募 4★ 及以上【先锋】【近卫】【重装】【特种】希望 -2" },
+        { id: "tuanjie",  name: "团结阵线分队", exp: 1, unlock: "内容拓展Ⅰ + 完成一次结局",
+          effect: "应急助力刷新不再消耗源石锭；初始携带【似曾相识棋盒】；同时部署 +1，进新区获得应急干员" },
+        { id: "tazhu",    name: "踏足遍历分队", exp: 1, unlock: "内容拓展Ⅰ + 完成一次结局",
+          effect: "使用加工品移动后随机揭露 3 处节点视野；初始携带【去踏足】；本区域视野全开则获得源石锭" },
+      ],
+
+      combos: [
+        { id: "xianshou", name: "先手必胜", classes: ["先锋", "狙击", "特种"], desc: "开局即施压，费用、位移与飞行单位处理一手抓" },
+        { id: "wenza",    name: "稳扎稳打", classes: ["重装", "术师", "狙击"], desc: "有坦有输出，最百搭的攻守配置" },
+        { id: "quchang",  name: "取长补短", classes: ["近卫", "辅助", "医疗"], desc: "近卫扛线，辅助与医疗负责续航和控制" },
+        { id: "linghuo",  name: "灵活部署", classes: ["先锋", "辅助", "特种"], desc: "费用、位移、控制拉满，吃操作上限" },
+        { id: "jianbu",   name: "坚不可摧", classes: ["重装", "术师", "医疗"], desc: "铁壁防线流，慢热但稳" },
+        { id: "suixin",   name: "随心所欲", classes: [], locked: true,
+          desc: "第一张必为 5★ 临时招募券，后两张从地面 / 高台职业中随机" },
+      ],
+    },
+  ],
 };
+
+</script>
+<script>
+/* 自动生成：全部六星干员（默认 box 用） */
+window.ROSTER = [{"n":"伊内丝","c":"先锋"},{"n":"伺夜","c":"先锋"},{"n":"凛御银灰","c":"先锋"},{"n":"可露希尔","c":"先锋"},{"n":"嵯峨","c":"先锋"},{"n":"忍冬","c":"先锋"},{"n":"推进之王","c":"先锋"},{"n":"焰尾","c":"先锋"},{"n":"琴柳","c":"先锋"},{"n":"缪尔赛思","c":"先锋"},{"n":"风笛","c":"先锋"},{"n":"丰川祥子","c":"近卫"},{"n":"乌尔比安","c":"近卫"},{"n":"仇白","c":"近卫"},{"n":"佩佩","c":"近卫"},{"n":"克莱门莎","c":"近卫"},{"n":"史尔特尔","c":"近卫"},{"n":"司霆惊蛰","c":"近卫"},{"n":"圣约送葬人","c":"近卫"},{"n":"塔露拉","c":"近卫"},{"n":"山","c":"近卫"},{"n":"左乐","c":"近卫"},{"n":"帕拉斯","c":"近卫"},{"n":"怒潮凛冬","c":"近卫"},{"n":"斯卡蒂","c":"近卫"},{"n":"棘刺","c":"近卫"},{"n":"止颂","c":"近卫"},{"n":"煌","c":"近卫"},{"n":"玛恩纳","c":"近卫"},{"n":"百炼嘉维尔","c":"近卫"},{"n":"维娜·维多利亚","c":"近卫"},{"n":"耀骑士临光","c":"近卫"},{"n":"艾丽妮","c":"近卫"},{"n":"薇薇安娜","c":"近卫"},{"n":"贝洛内","c":"近卫"},{"n":"赤刃明霄陈","c":"近卫"},{"n":"赫德雷","c":"近卫"},{"n":"赫拉格","c":"近卫"},{"n":"重岳","c":"近卫"},{"n":"银灰","c":"近卫"},{"n":"锏","c":"近卫"},{"n":"陈","c":"近卫"},{"n":"隐德来希","c":"近卫"},{"n":"余","c":"重装"},{"n":"信仰搅拌机","c":"重装"},{"n":"号角","c":"重装"},{"n":"塞雷娅","c":"重装"},{"n":"年","c":"重装"},{"n":"斥罪","c":"重装"},{"n":"斩业星熊","c":"重装"},{"n":"星熊","c":"重装"},{"n":"机械师","c":"重装"},{"n":"森蚺","c":"重装"},{"n":"泥岩","c":"重装"},{"n":"涤火杰西卡","c":"重装"},{"n":"珊比","c":"重装"},{"n":"瑕光","c":"重装"},{"n":"黍","c":"重装"},{"n":"W","c":"狙击"},{"n":"假日威龙陈","c":"狙击"},{"n":"娜仁图亚","c":"狙击"},{"n":"提丰","c":"狙击"},{"n":"早露","c":"狙击"},{"n":"灰烬","c":"狙击"},{"n":"焰狐龙梓兰","c":"狙击"},{"n":"空弦","c":"狙击"},{"n":"维什戴尔","c":"狙击"},{"n":"能天使","c":"狙击"},{"n":"莱伊","c":"狙击"},{"n":"菲亚梅塔","c":"狙击"},{"n":"蕾缪安","c":"狙击"},{"n":"远牙","c":"狙击"},{"n":"迷迭香","c":"狙击"},{"n":"鸿雪","c":"狙击"},{"n":"黑","c":"狙击"},{"n":"伊芙利特","c":"术师"},{"n":"刻俄柏","c":"术师"},{"n":"卡涅利安","c":"术师"},{"n":"圣聆初雪","c":"术师"},{"n":"夕","c":"术师"},{"n":"妮芙","c":"术师"},{"n":"异客","c":"术师"},{"n":"林","c":"术师"},{"n":"死芒","c":"术师"},{"n":"澄闪","c":"术师"},{"n":"烛煌","c":"术师"},{"n":"玛露西尔","c":"术师"},{"n":"真言","c":"术师"},{"n":"维伊","c":"术师"},{"n":"艾雅法拉","c":"术师"},{"n":"荒芜拉普兰德","c":"术师"},{"n":"莫斯提马","c":"术师"},{"n":"谬因","c":"术师"},{"n":"逻各斯","c":"术师"},{"n":"霍尔海雅","c":"术师"},{"n":"黑键","c":"术师"},{"n":"Mon3tr","c":"医疗"},{"n":"凯尔希","c":"医疗"},{"n":"凯尔希·思衡托","c":"医疗"},{"n":"夜莺","c":"医疗"},{"n":"流明","c":"医疗"},{"n":"焰影苇草","c":"医疗"},{"n":"纯烬艾雅法拉","c":"医疗"},{"n":"缇缇","c":"医疗"},{"n":"闪灵","c":"医疗"},{"n":"令","c":"辅助"},{"n":"冻河","c":"辅助"},{"n":"塑心","c":"辅助"},{"n":"娜斯提","c":"辅助"},{"n":"安洁莉娜","c":"辅助"},{"n":"浊心斯卡蒂","c":"辅助"},{"n":"淬羽赫默","c":"辅助"},{"n":"溯光星源","c":"辅助"},{"n":"灵知","c":"辅助"},{"n":"电弧","c":"辅助"},{"n":"白铁","c":"辅助"},{"n":"遥","c":"辅助"},{"n":"酒神","c":"辅助"},{"n":"铃兰","c":"辅助"},{"n":"魔王","c":"辅助"},{"n":"麦哲伦","c":"辅助"},{"n":"予愿安洁莉娜","c":"特种"},{"n":"傀影","c":"特种"},{"n":"国度","c":"特种"},{"n":"多萝西","c":"特种"},{"n":"弑君者","c":"特种"},{"n":"引星棘刺","c":"特种"},{"n":"归溟幽灵鲨","c":"特种"},{"n":"新约能天使","c":"特种"},{"n":"望","c":"特种"},{"n":"歌蕾蒂娅","c":"特种"},{"n":"水月","c":"特种"},{"n":"温蒂","c":"特种"},{"n":"琳琅诗怀雅","c":"特种"},{"n":"结城理","c":"特种"},{"n":"缄默德克萨斯","c":"特种"},{"n":"老鲤","c":"特种"},{"n":"艾拉","c":"特种"},{"n":"阿","c":"特种"},{"n":"阿斯卡纶","c":"特种"},{"n":"麒麟R夜刀","c":"特种"}];
 
 </script>
 <script>window.BOX = null;</script>
 <script>
 /* =========================================================
- * 沉沦者的黑流树海 · 开局抽签  —— 逻辑层
+ * 集成战略 · 开局抽签  —— 逻辑层（多主题 + 默认 box）
  * 无框架、无依赖，file:// 双击即可运行。
  * ========================================================= */
 (function () {
@@ -1562,44 +1835,69 @@ window.GAME_DATA = {
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-  const KEY = 'is6-roller-state-v1';
-  const MAX_D = D.meta.maxDifficulty;
+  const KEY = 'is6-roller-v3';
   const CLASSES = D.classes;
+  const THEMES = D.themes;
+  const THEME_BY_ID = new Map(THEMES.map((t) => [t.id, t]));
+  const DEFAULT_THEME = THEMES[0].id;
   const BOX = window.BOX || null;
+  const ROSTER = window.ROSTER || [];
   const BAN_LV_STOPS = [1, 2, 10, 30, 60, 80, 90];
 
-  const SQUAD_BY_ID = new Map(D.squads.map((s) => [s.id, s]));
-  const COMBO_BY_ID = new Map(D.combos.map((c) => [c.id, c]));
-  const DIFF_BY_V = new Map(D.difficulties.map((d) => [d.v, d]));
-
   /* 难度色带 */
-  const BANDS = [
-    { max: 4,  color: '#6fd3a4', soft: 'rgba(111, 211, 164, .13)' },
-    { max: 9,  color: '#54b7b0', soft: 'rgba(84, 183, 176, .13)' },
-    { max: 10, color: '#d9a95c', soft: 'rgba(217, 169, 92, .13)' },
-    { max: 15, color: '#cf5a67', soft: 'rgba(207, 90, 103, .15)' },
-    { max: 99, color: '#b98cf0', soft: 'rgba(185, 140, 240, .15)' },
-  ];
-  const bandOf = (v) => BANDS.find((b) => v <= b.max) || BANDS[BANDS.length - 1];
-  const bandLabel = (v) => (v <= 4 ? '低难' : v <= 10 ? '中坚' : v <= 15 ? '高难' : '极限');
+  const BANDS = {
+    blackflow: [
+      { max: 4,  color: '#6fd3a4', soft: 'rgba(111, 211, 164, .13)' },
+      { max: 9,  color: '#54b7b0', soft: 'rgba(84, 183, 176, .13)' },
+      { max: 10, color: '#d9a95c', soft: 'rgba(217, 169, 92, .13)' },
+      { max: 15, color: '#cf5a67', soft: 'rgba(207, 90, 103, .15)' },
+      { max: 99, color: '#b98cf0', soft: 'rgba(185, 140, 240, .15)' },
+    ],
+    jieyuan: [
+      { max: 4,  color: '#3f9c84', soft: 'rgba(63, 156, 132, .13)' },
+      { max: 9,  color: '#2f8f7d', soft: 'rgba(47, 143, 125, .13)' },
+      { max: 10, color: '#c08a3e', soft: 'rgba(192, 138, 62, .14)' },
+      { max: 15, color: '#c34f74', soft: 'rgba(195, 79, 116, .14)' },
+      { max: 99, color: '#8a4b8f', soft: 'rgba(138, 75, 143, .15)' },
+    ],
+  };
 
-  const DEFAULT_EXCLUDED_SQUADS = D.squads.filter((s) => s.id === 'maotou').map((s) => s.id);
-  const DEFAULT_EXCLUDED_COMBOS = D.combos.filter((c) => c.locked).map((c) => c.id);
-
-  function defaults() {
+  /* ---------------- 状态 ---------------- */
+  function themeDefaults(t) {
     return {
-      diffMin: 0,
-      diffMax: 12,
-      excludedSquads: DEFAULT_EXCLUDED_SQUADS.slice(),
-      excludedCombos: DEFAULT_EXCLUDED_COMBOS.slice(),
-      house: false,
-      locks: { difficulty: false, squad: false, combo: false },
-      ban: { enabled: false, minLevel: 2, classes: CLASSES.slice() },
+      diffMin: t.defaultDiff[0],
+      diffMax: t.defaultDiff[1],
+      excludedSquads: (t.defaultExcludeSquads || []).slice(),
+      excludedCombos: (t.defaultExcludeCombos || []).slice(),
     };
   }
 
-  /* ---------------- 状态 ---------------- */
+  function defaults() {
+    const cfg = {};
+    THEMES.forEach((t) => { cfg[t.id] = themeDefaults(t); });
+    return {
+      theme: DEFAULT_THEME,
+      cfg: cfg,
+      house: false,
+      locks: { difficulty: false, squad: false, combo: false },
+      ban: { enabled: false, minLevel: 2, classes: CLASSES.slice() },
+      held: {},
+    };
+  }
+
   const S = Object.assign(defaults(), { history: [], current: null, rolling: false });
+
+  const cur = () => THEME_BY_ID.get(S.theme) || THEMES[0];
+  const cfg = () => {
+    if (!S.cfg[S.theme]) S.cfg[S.theme] = themeDefaults(cur());
+    return S.cfg[S.theme];
+  };
+  const diffOf = (v) => cur().difficulties.filter((d) => d.v === v)[0] || null;
+  const squadOf = (id) => cur().squads.filter((s) => s.id === id)[0] || null;
+  const comboOf = (id) => cur().combos.filter((c) => c.id === id)[0] || null;
+  const bands = () => BANDS[cur().css] || BANDS.blackflow;
+  const bandOf = (v) => bands().filter((b) => v <= b.max)[0] || bands()[bands().length - 1];
+  const bandLabel = (v) => (v <= 4 ? '低难' : v <= 10 ? '中坚' : v <= 15 ? '高难' : '极限');
 
   function load() {
     let raw = null;
@@ -1609,10 +1907,25 @@ window.GAME_DATA = {
     try { o = JSON.parse(raw); } catch (e) { return; }
     if (!o || typeof o !== 'object') return;
 
-    if (Number.isFinite(o.diffMin)) S.diffMin = clamp(o.diffMin | 0, 0, MAX_D);
-    if (Number.isFinite(o.diffMax)) S.diffMax = clamp(o.diffMax | 0, 0, MAX_D);
-    if (Array.isArray(o.excludedSquads)) S.excludedSquads = o.excludedSquads.filter((id) => SQUAD_BY_ID.has(id));
-    if (Array.isArray(o.excludedCombos)) S.excludedCombos = o.excludedCombos.filter((id) => COMBO_BY_ID.has(id));
+    if (typeof o.theme === 'string' && THEME_BY_ID.has(o.theme)) S.theme = o.theme;
+
+    if (o.cfg && typeof o.cfg === 'object') {
+      THEMES.forEach((t) => {
+        const c = o.cfg[t.id];
+        if (!c) return;
+        const base = themeDefaults(t);
+        if (Number.isFinite(c.diffMin)) base.diffMin = clamp(c.diffMin | 0, 0, t.maxDifficulty);
+        if (Number.isFinite(c.diffMax)) base.diffMax = clamp(c.diffMax | 0, 0, t.maxDifficulty);
+        if (Array.isArray(c.excludedSquads)) {
+          base.excludedSquads = c.excludedSquads.filter((id) => t.squads.some((s) => s.id === id));
+        }
+        if (Array.isArray(c.excludedCombos)) {
+          base.excludedCombos = c.excludedCombos.filter((id) => t.combos.some((x) => x.id === id));
+        }
+        S.cfg[t.id] = base;
+      });
+    }
+
     if (typeof o.house === 'boolean') S.house = o.house;
     if (o.locks && typeof o.locks === 'object') {
       S.locks = {
@@ -1629,6 +1942,12 @@ window.GAME_DATA = {
         if (valid.length) S.ban.classes = valid;
       }
     }
+    if (o.held && typeof o.held === 'object') {
+      Object.keys(o.held).forEach((n) => {
+        if (o.held[n] === 0 || o.held[n] === false) S.held[n] = 0;
+        else if (o.held[n] === 1 || o.held[n] === true) S.held[n] = 1;
+      });
+    }
     if (Array.isArray(o.history)) {
       S.history = o.history.filter((h) => h && h.text && Number.isFinite(h.at)).slice(0, 40);
     }
@@ -1636,18 +1955,19 @@ window.GAME_DATA = {
   }
 
   function validate(r) {
-    return r && Number.isFinite(r.diff) && DIFF_BY_V.has(r.diff) && SQUAD_BY_ID.has(r.squad) && COMBO_BY_ID.has(r.combo);
+    const t = THEME_BY_ID.get(r.theme);
+    return !!(r && t && Number.isFinite(r.diff) && diffOf(r.diff) && squadOf(r.squad) && comboOf(r.combo) && r.theme === S.theme);
   }
 
   function save() {
     try {
       localStorage.setItem(KEY, JSON.stringify({
-        diffMin: S.diffMin, diffMax: S.diffMax,
-        excludedSquads: S.excludedSquads,
-        excludedCombos: S.excludedCombos,
+        theme: S.theme,
+        cfg: S.cfg,
         house: S.house,
         locks: S.locks,
         ban: S.ban,
+        held: S.held,
         history: S.history.slice(0, 40),
         current: S.current,
       }));
@@ -1656,18 +1976,63 @@ window.GAME_DATA = {
 
   /* ---------------- 池子 ---------------- */
   function range() {
-    return S.diffMin <= S.diffMax ? [S.diffMin, S.diffMax] : [S.diffMax, S.diffMin];
+    const c = cfg();
+    const max = cur().maxDifficulty;
+    const lo = clamp(Math.min(c.diffMin, c.diffMax), 0, max);
+    const hi = clamp(Math.max(c.diffMin, c.diffMax), 0, max);
+    return [lo, hi];
   }
 
   function buildPool() {
+    const t = cur();
+    const c = cfg();
     const [lo, hi] = range();
-    const diffs = D.difficulties.filter((d) => d.v >= lo && d.v <= hi);
-    const squads = D.squads.filter((s) => S.excludedSquads.indexOf(s.id) === -1);
-    const combos = D.combos.filter((c) => S.excludedCombos.indexOf(c.id) === -1);
+    const diffs = t.difficulties.filter((d) => d.v >= lo && d.v <= hi);
+    const squads = t.squads.filter((s) => c.excludedSquads.indexOf(s.id) === -1);
+    const combos = t.combos.filter((x) => c.excludedCombos.indexOf(x.id) === -1);
     if (!squads.length) return { error: '没有可用的分队了，去「约束」里放开一个' };
     if (!combos.length) return { error: '没有可用的招募组合了，去「约束」里放开一个' };
     if (!diffs.length) return { error: '难度区间为空，调整一下最高/最低' };
     return { diffs, squads, combos };
+  }
+
+  /* ---------------- 干员 box ---------------- */
+  const BOX_INDEX = {};
+  if (BOX && Array.isArray(BOX.operators)) {
+    BOX.operators.forEach((o) => { BOX_INDEX[o.name] = o; });
+  }
+
+  function held(name) {
+    if (Object.prototype.hasOwnProperty.call(S.held, name)) return !!S.held[name];
+    if (BOX) return !!BOX_INDEX[name];   // 有识别结果：以识别为准
+    return true;                          // 没有识别结果：默认全部持有
+  }
+
+  function opLevel(name) {
+    const b = BOX_INDEX[name];
+    return b && Number.isFinite(b.level) ? b.level : null;
+  }
+
+  function eligible(name) {
+    if (!held(name)) return false;
+    const lv = opLevel(name);
+    return lv === null || lv >= S.ban.minLevel;
+  }
+
+  function pickBans() {
+    if (!S.ban.enabled || !ROSTER.length) return [];
+    const pool = ROSTER.filter((o) => eligible(o.n));
+    const out = [];
+    CLASSES.forEach((c) => {
+      if (S.ban.classes.indexOf(c) === -1) return;
+      const cands = pool.filter((o) => o.c === c);
+      out.push(cands.length ? { c: c, n: pick(cands).n } : { c: c, n: null });
+    });
+    return out;
+  }
+
+  function rosterByClass(c) {
+    return ROSTER.filter((o) => o.c === c);
   }
 
   /* ---------------- 抽签 ---------------- */
@@ -1680,11 +2045,7 @@ window.GAME_DATA = {
 
   function rollClassesFor(combo) {
     if (combo.id !== 'suixin') return null;
-    return [
-      D.suixinPool.first,
-      pick(D.suixinPool.second),
-      pick(D.suixinPool.third),
-    ];
+    return [D.suixinPool.first, pick(D.suixinPool.second), pick(D.suixinPool.third)];
   }
 
   async function roll() {
@@ -1699,18 +2060,19 @@ window.GAME_DATA = {
     $('#stage').classList.add('rolling');
 
     const prev = S.current;
-    const diff = S.locks.difficulty && prev ? (DIFF_BY_V.get(prev.diff) || pick(pool.diffs)) : pick(pool.diffs);
-    const squad = S.locks.squad && prev ? (SQUAD_BY_ID.get(prev.squad) || pick(pool.squads)) : pick(pool.squads);
-    const combo = S.locks.combo && prev ? (COMBO_BY_ID.get(prev.combo) || pick(pool.combos)) : pick(pool.combos);
+    const same = prev && prev.theme === S.theme;
+    const diff = S.locks.difficulty && same ? (diffOf(prev.diff) || pick(pool.diffs)) : pick(pool.diffs);
+    const squad = S.locks.squad && same ? (squadOf(prev.squad) || pick(pool.squads)) : pick(pool.squads);
+    const combo = S.locks.combo && same ? (comboOf(prev.combo) || pick(pool.combos)) : pick(pool.combos);
 
     const jobs = [];
-    if (!(S.locks.difficulty && prev)) {
+    if (!(S.locks.difficulty && same)) {
       jobs.push(shuffle('difficulty', pool.diffs.map((d) => String(d.v)), String(diff.v), 560));
     }
-    if (!(S.locks.squad && prev)) {
+    if (!(S.locks.squad && same)) {
       jobs.push(shuffle('squad', pool.squads.map((s) => s.name), squad.name, 720));
     }
-    if (!(S.locks.combo && prev)) {
+    if (!(S.locks.combo && same)) {
       jobs.push(shuffle('combo', pool.combos.map((c) => c.name), combo.name, 880));
     }
     await Promise.all(jobs);
@@ -1720,6 +2082,7 @@ window.GAME_DATA = {
     const res = {
       id: makeId(),
       at: Date.now(),
+      theme: S.theme,
       diff: diff.v,
       squad: squad.id,
       combo: combo.id,
@@ -1754,6 +2117,8 @@ window.GAME_DATA = {
   }
 
   /* ---------------- 渲染 ---------------- */
+  const el = (id) => document.getElementById(id);
+
   function setSlot(key, value, sub, detailHtml, color, soft) {
     const slot = $('.slot[data-slot="' + key + '"]');
     if (color) slot.style.setProperty('--accent', color);
@@ -1764,31 +2129,30 @@ window.GAME_DATA = {
   }
 
   function paintResult(res, flash) {
-    const d = DIFF_BY_V.get(res.diff);
-    const s = SQUAD_BY_ID.get(res.squad);
-    const c = COMBO_BY_ID.get(res.combo);
+    const d = diffOf(res.diff);
+    const s = squadOf(res.squad);
+    const c = comboOf(res.combo);
     if (!d || !s || !c) return;
 
     const b = bandOf(d.v);
     setSlot('difficulty', String(d.v),
-      '保密等级 · ' + bandLabel(d.v) + ' · 敌人难度 ' + d.enemy + ' · 得分 +' + d.score + '%',
+      cur().diffLabel + ' · ' + bandLabel(d.v) + ' · 敌人难度 ' + d.enemy + ' · 得分 +' + d.score + '%',
       esc(d.desc), b.color, b.soft);
     updateGauge(d.v);
 
     const unlockNote = s.unlock && s.unlock !== '初始解锁'
       ? '<br><span class="unlock">解锁条件：' + esc(s.unlock) + '</span>' : '';
-    setSlot('squad', s.name,
-      '探索分队' + (s.expansion ? ' · 内容拓展Ⅰ' : ''),
+    const expTag = s.exp ? ' · 内容拓展' + (s.exp === 1 ? 'Ⅰ' : 'Ⅱ') : '';
+    setSlot('squad', s.name, '探索分队' + expTag,
       esc(s.effect) + unlockNote,
-      s.expansion ? '#b98cf0' : '#4fada6',
-      s.expansion ? 'rgba(185, 140, 240, .14)' : 'rgba(79, 173, 166, .14)');
+      s.exp ? (s.exp === 2 ? '#8a4b8f' : '#b98cf0') : (cur().css === 'jieyuan' ? '#2f8f7d' : '#4fada6'),
+      s.exp ? 'rgba(138, 75, 143, .12)' : 'rgba(79, 173, 166, .12)');
 
     const chips = (c.id === 'suixin' && res.comboRoll)
       ? res.comboRoll.map((x, i) => '<span class="cls"><i>' + (i + 1) + '</i>' + esc(x) + '</span>')
       : c.classes.map((x) => '<span class="cls">' + esc(x) + '</span>');
     setSlot('combo', c.name, '初始招募组合',
-      '<span class="cls-row">' + chips.join('') + '</span><span class="cmt">' + esc(c.desc) + '</span>',
-      '#4fada6', 'rgba(79, 173, 166, .14)');
+      '<span class="cls-row">' + chips.join('') + '</span><span class="cmt">' + esc(c.desc) + '</span>');
 
     const extra = $('#extraLine');
     if (res.house) {
@@ -1811,12 +2175,28 @@ window.GAME_DATA = {
     }
   }
 
+  function renderBans(res) {
+    const panel = $('#banPanel');
+    const bans = (res && res.bans) || [];
+    if (!S.ban.enabled || !ROSTER.length || !bans.length) { panel.hidden = true; return; }
+    panel.hidden = false;
+    $('#banSub').textContent = '每职业 1 名 · ' + bans.length + ' 个职业参与 · 来自你的干员池';
+    $('#banList').innerHTML = bans.map((b) =>
+      '<li class="ban-item' + (b.n ? '' : ' empty') + '">' +
+      '<span class="ban-dot"></span>' +
+      '<span class="ban-class">' + esc(b.c) + '</span>' +
+      '<span class="ban-name">' + (b.n ? esc(b.n) : '无人可禁') + '</span>' +
+      '</li>').join('');
+  }
+
   function buildGauge() {
-    const el = $('#gauge');
-    if (!el) return;
-    el.innerHTML = D.difficulties.map((d) => {
-      const tick = d.v === 3 || d.v === 6 || d.v === 9 || d.v === 12 || d.v === 16 ? ' tick' : '';
-      return '<i data-v="' + d.v + '" class="' + tick.trim() + '" title="保密等级 ' + d.v + '"></i>';
+    const g = $('#gauge');
+    if (!g) return;
+    const t = cur();
+    const ticks = [3, 6, 9, 12];
+    g.innerHTML = t.difficulties.map((d) => {
+      const tick = ticks.indexOf(d.v) !== -1 ? ' tick' : '';
+      return '<i data-v="' + d.v + '" class="' + tick.trim() + '" title="' + esc(t.diffLabel) + '·' + d.v + '"></i>';
     }).join('');
   }
 
@@ -1826,7 +2206,8 @@ window.GAME_DATA = {
     });
   }
 
-  function renderLocks() {    ['difficulty', 'squad', 'combo'].forEach((key) => {
+  function renderLocks() {
+    ['difficulty', 'squad', 'combo'].forEach((key) => {
       const btn = $('[data-lock="' + key + '"]');
       if (!btn) return;
       const on = !!S.locks[key] && !!S.current;
@@ -1836,75 +2217,95 @@ window.GAME_DATA = {
   }
 
   function renderFooter(res) {
-    const id = res ? res.id : null;
-    $('#seedLine').textContent = id ? '编号 #' + id : '编号 —';
-    $('#versionLine').textContent = '沉沦者开局抽签 ' + D.meta.version;
+    $('#seedLine').textContent = res ? '编号 #' + res.id : '编号 —';
+    $('#versionLine').textContent = '集成战略开局抽签 ' + D.meta.version;
+  }
+
+  function renderThemeTabs() {
+    const nav = $('#themeTabs');
+    if (!nav) return;
+    nav.innerHTML = THEMES.map((t) => {
+      const on = t.id === S.theme;
+      return '<button type="button" class="theme-tab' + (on ? ' on' : '') + '" data-theme="' + t.id + '">' +
+        '<span class="tt-code">' + esc(t.code) + '</span>' +
+        '<span class="tt-name">' + esc(t.short) + '</span>' +
+        '</button>';
+    }).join('');
   }
 
   function renderChips() {
+    const t = cur();
+    const c = cfg();
     const sq = $('#squadChips');
-    sq.innerHTML = D.squads.map((s) => {
-      const on = S.excludedSquads.indexOf(s.id) === -1;
+    sq.innerHTML = t.squads.map((s) => {
+      const on = c.excludedSquads.indexOf(s.id) === -1;
       let note = '';
-      if (s.expansion) note = '<small>拓展Ⅰ</small>';
+      if (s.exp) note = '<small>拓展' + (s.exp === 1 ? 'Ⅰ' : 'Ⅱ') + '</small>';
       else if (s.unlock !== '初始解锁') note = '<small>需解锁</small>';
       return '<button type="button" class="chip" data-squad="' + s.id + '" aria-pressed="' + on + '" title="' +
         esc(s.unlock) + '">' + esc(s.name) + note + '</button>';
     }).join('');
 
     const cb = $('#comboChips');
-    cb.innerHTML = D.combos.map((c) => {
-      const on = S.excludedCombos.indexOf(c.id) === -1;
-      const note = c.locked ? '<small>需解锁</small>' : '';
-      return '<button type="button" class="chip" data-combo="' + c.id + '" aria-pressed="' + on + '">' +
-        esc(c.name) + note + '</button>';
+    cb.innerHTML = t.combos.map((x) => {
+      const on = c.excludedCombos.indexOf(x.id) === -1;
+      const note = x.locked ? '<small>需解锁</small>' : '';
+      return '<button type="button" class="chip" data-combo="' + x.id + '" aria-pressed="' + on + '">' +
+        esc(x.name) + note + '</button>';
     }).join('');
 
     updateCounts();
   }
 
   function updateCounts() {
-    const nS = D.squads.length - S.excludedSquads.length;
-    const nC = D.combos.length - S.excludedCombos.length;
-    $('#squadCount').textContent = nS + ' / ' + D.squads.length;
-    $('#comboCount').textContent = nC + ' / ' + D.combos.length;
+    const t = cur();
+    const c = cfg();
+    $('#squadCount').textContent = (t.squads.length - c.excludedSquads.length) + ' / ' + t.squads.length;
+    $('#comboCount').textContent = (t.combos.length - c.excludedCombos.length) + ' / ' + t.combos.length;
   }
 
   function updateConstraintLine() {
     const [lo, hi] = range();
-    const nS = D.squads.length - S.excludedSquads.length;
-    const nC = D.combos.length - S.excludedCombos.length;
+    const t = cur();
+    const c = cfg();
+    const nS = t.squads.length - c.excludedSquads.length;
+    const nC = t.combos.length - c.excludedCombos.length;
     const locks = ['difficulty', 'squad', 'combo'].filter((k) => S.locks[k] && S.current).length;
 
     let html = '难度 <b>' + lo + '–' + hi + '</b>' +
-      '<span class="sep">·</span>分队 <b>' + nS + '/' + D.squads.length + '</b>' +
-      '<span class="sep">·</span>组合 <b>' + nC + '/' + D.combos.length + '</b>';
+      '<span class="sep">·</span>分队 <b>' + nS + '/' + t.squads.length + '</b>' +
+      '<span class="sep">·</span>组合 <b>' + nC + '/' + t.combos.length + '</b>';
     if (locks) html += '<span class="sep">·</span>已锁 <b>' + locks + '</b> 项';
     if (S.house) html += '<span class="sep">·</span>房规 <b>开</b>';
-
+    if (S.ban.enabled) html += '<span class="sep">·</span>禁选 <b>开</b>';
     if (!nS || !nC) html += '<span class="sep">·</span><span class="warn">池子空了，去约束里放开一个</span>';
 
     $('#constraintLine').innerHTML = html;
     $('#diffHint').textContent = '当前区间 ' + lo + ' – ' + hi + '，共 ' + (hi - lo + 1) + ' 级，区间内等概率。';
-    $('#diffHint').title = D.difficultyNote;
+    $('#diffHint').title = t.diffNote || '';
   }
 
   function syncRangeInputs() {
     const [lo, hi] = range();
+    const max = cur().maxDifficulty;
+    ['rngMin', 'rngMax'].forEach((id) => { $('#' + id).max = String(max); });
     $('#rngMin').value = String(lo);
     $('#rngMax').value = String(hi);
     $('#outMin').textContent = String(lo);
     $('#outMax').textContent = String(hi);
+    $('#diffPresetMax').textContent = String(max);
+    $('#diffLabelText').textContent = cur().diffLabel;
     markPreset();
   }
 
   function markPreset() {
     const [lo, hi] = range();
+    const max = cur().maxDifficulty;
     let key = '';
     if (lo === 0 && hi <= 6) key = 'easy';
     else if (lo === 0 && hi === 12) key = 'std';
     else if (lo >= 10) key = 'hard';
-    else if (lo === 0 && hi === MAX_D) key = 'all';
+    else if (lo === 0 && hi === max) key = 'all';
     $$('#presetRow button').forEach((b) => b.classList.toggle('on', b.dataset.preset === key));
   }
 
@@ -1913,44 +2314,22 @@ window.GAME_DATA = {
     $('#chkHouse').checked = S.house;
   }
 
-  /* ---------------- 干员禁选 ---------------- */
-  function eligiblePool() {
-    if (!BOX || !Array.isArray(BOX.operators)) return [];
-    return BOX.operators.filter((o) => o.rarity === 5 && (o.level || 0) >= S.ban.minLevel);
-  }
-
-  function pickBans() {
-    if (!BOX || !S.ban.enabled) return [];
-    const pool = eligiblePool();
-    const out = [];
-    CLASSES.forEach((c) => {
-      if (S.ban.classes.indexOf(c) === -1) return;
-      const cands = pool.filter((o) => o.class === c);
-      out.push(cands.length ? { c, n: pick(cands).name } : { c, n: null });
-    });
-    return out;
-  }
-
-  function renderBans(res) {
-    const panel = $('#banPanel');
-    const bans = (res && res.bans) || [];
-    if (!S.ban.enabled || !BOX || !bans.length) { panel.hidden = true; return; }
-    panel.hidden = false;
-    $('#banSub').textContent = '每职业 1 名 · ' + bans.length + ' 个职业参与';
-    $('#banList').innerHTML = bans.map((b) =>
-      '<li class="ban-item' + (b.n ? '' : ' empty') + '">' +
-      '<span class="ban-dot"></span>' +
-      '<span class="ban-class">' + esc(b.c) + '</span>' +
-      '<span class="ban-name">' + (b.n ? esc(b.n) : '无人可禁') + '</span>' +
-      '</li>').join('');
+  /* ---------------- 干员池 UI ---------------- */
+  function heldCount() {
+    return ROSTER.filter((o) => held(o.n)).length;
   }
 
   function updateBoxStatus() {
-    const el = $('#boxStatus');
-    if (!el) return;
-    if (!BOX) { el.textContent = '还没有识别结果。需要一台 Windows 电脑跑一次识别（点「怎么识别？」）；手机上可以先抽难度 / 分队 / 组合。'; return; }
-    el.textContent = '已识别 ' + (BOX.total || 0) + ' 名 · 六星 ' + (BOX.sixStar || 0) +
-      ' · 当前练度可禁选 ' + eligiblePool().length + ' 名（' + (BOX.generatedAt || '') + '）';
+    const box = $('#boxStatus');
+    if (!box) return;
+    const total = ROSTER.length;
+    const n = heldCount();
+    if (BOX) {
+      box.textContent = '已识别六星 ' + (BOX.sixStar || Object.keys(BOX_INDEX).length) + ' 名 · 你的池子 ' +
+        n + '/' + total + '（可手动调整）';
+    } else {
+      box.textContent = '默认全部 ' + total + ' 名六星持有。点「管理干员池」取消没练 / 没有的。';
+    }
   }
 
   function renderBanChips() {
@@ -1961,27 +2340,49 @@ window.GAME_DATA = {
       (S.ban.classes.indexOf(c) !== -1) + '">' + esc(c) + '</button>').join('');
   }
 
+  let poolQuery = '';
+
   function renderPool() {
     const body = $('#poolBody');
     const hint = $('#poolHint');
     if (!body) return;
-    if (!BOX || !Array.isArray(BOX.operators)) {
-      body.innerHTML = '<p class="pool-empty">还没有识别结果。把截图放进 screenshots 文件夹，双击「识别box.bat」。</p>';
-      hint.textContent = '—';
-      return;
-    }
-    hint.textContent = '共 ' + BOX.total + ' 名 · 六星 ' + BOX.sixStar + ' · 高亮的是当前练度下能进禁选池的';
+
+    const total = ROSTER.length;
+    hint.textContent = '共 ' + total + ' 名六星 · 已选 ' + heldCount() +
+      ' · 点名字切换持有状态' + (BOX ? ' · 带 Lv 的是识别到的等级' : '');
+
+    const q = poolQuery.trim();
     const html = CLASSES.map((c) => {
-      const ops = BOX.operators.filter((o) => o.rarity === 5 && o.class === c)
-        .sort((a, b) => (b.level || 0) - (a.level || 0));
+      const ops = rosterByClass(c).filter((o) => !q || o.n.indexOf(q) !== -1);
       if (!ops.length) return '';
       return '<div class="pool-class"><h4>' + esc(c) + '<span>' + ops.length + '</span></h4>' +
-        '<div class="pool-ops">' + ops.map((o) =>
-          '<span class="pool-op ' + ((o.level || 0) >= S.ban.minLevel ? 'elig' : 'noelig') + '">' +
-          esc(o.name) + '<span class="lv">Lv' + (o.level || '?') + '</span></span>').join('') +
-        '</div></div>';
+        '<div class="pool-ops">' + ops.map((o) => {
+          const on = held(o.n);
+          const lv = opLevel(o.n);
+          return '<button type="button" class="pool-op ' + (on ? 'held' : 'notheld') + '" data-op="' + esc(o.n) + '"' +
+            ' aria-pressed="' + on + '">' + esc(o.n) +
+            '<span class="lv">' + (lv ? 'Lv' + lv : '—') + '</span></button>';
+        }).join('') + '</div></div>';
     }).join('');
-    body.innerHTML = html || '<p class="pool-empty">没有六星干员。</p>';
+
+    body.innerHTML = html || '<p class="pool-empty">没有匹配的干员。</p>';
+  }
+
+  function toggleOp(name) {
+    const now = held(name);
+    S.held[name] = now ? 0 : 1;
+    renderPool();
+    updateBoxStatus();
+    if (S.current) { S.current.bans = pickBans(); renderBans(S.current); }
+    save();
+  }
+
+  function setAllHeld(on) {
+    ROSTER.forEach((o) => { S.held[o.n] = on ? 1 : 0; });
+    renderPool();
+    updateBoxStatus();
+    if (S.current) { S.current.bans = pickBans(); renderBans(S.current); }
+    save();
   }
 
   /* ---------------- 文案 ---------------- */
@@ -1991,12 +2392,13 @@ window.GAME_DATA = {
   }
 
   function buildText(res) {
-    const d = DIFF_BY_V.get(res.diff) || D.difficulties[0];
-    const s = SQUAD_BY_ID.get(res.squad) || D.squads[0];
-    const c = COMBO_BY_ID.get(res.combo) || D.combos[0];
+    const t = THEME_BY_ID.get(res.theme) || cur();
+    const d = t.difficulties.filter((x) => x.v === res.diff)[0] || t.difficulties[0];
+    const s = t.squads.filter((x) => x.id === res.squad)[0] || t.squads[0];
+    const c = t.combos.filter((x) => x.id === res.combo)[0] || t.combos[0];
     const lines = [
-      '【' + D.meta.theme + ' · 开局抽签】',
-      '难度　保密等级·' + d.v + '（敌人难度 ' + d.enemy + ' / 得分 +' + d.score + '%）',
+      '【' + t.name + ' · 开局抽签】',
+      '难度　' + t.diffLabel + '·' + d.v + '（敌人难度 ' + d.enemy + ' / 得分 +' + d.score + '%）',
       '分队　' + s.name,
       '招募　' + c.name + '：' + comboLine(c, res.comboRoll),
     ];
@@ -2011,11 +2413,11 @@ window.GAME_DATA = {
   /* ---------------- 复制 / 提示 ---------------- */
   let toastTimer = null;
   function toast(msg) {
-    const el = $('#toast');
-    el.textContent = msg;
-    el.classList.add('show');
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
   }
 
   function copyText(text) {
@@ -2042,84 +2444,121 @@ window.GAME_DATA = {
     } catch (e) { return false; }
   }
 
-  /* ---------------- 抽屉 / 记录 ---------------- */
+  /* ---------------- 抽屉 / 弹层 ---------------- */
+  function bodyLock() {
+    document.body.style.overflow = 'hidden';
+  }
+  function bodyUnlock() {
+    if (!$('#drawer').classList.contains('open') &&
+        $('#historyModal').hidden && $('#poolModal').hidden && $('#howModal').hidden) {
+      document.body.style.overflow = '';
+    }
+  }
+
   function openDrawer() {
     $('#drawer').classList.add('open');
     $('#drawer').setAttribute('aria-hidden', 'false');
     $('#scrim').hidden = false;
-    document.body.style.overflow = 'hidden';
+    bodyLock();
   }
   function closeDrawer() {
     $('#drawer').classList.remove('open');
     $('#drawer').setAttribute('aria-hidden', 'true');
     $('#scrim').hidden = true;
-    if ($('#historyModal').hidden) document.body.style.overflow = '';
+    bodyUnlock();
   }
 
   function openHistory() {
     renderHistory();
     $('#historyModal').hidden = false;
-    document.body.style.overflow = 'hidden';
+    bodyLock();
   }
   function closeHistory() {
     $('#historyModal').hidden = true;
-    if (!$('#drawer').classList.contains('open')) document.body.style.overflow = '';
-  }
-
-  function renderHistory() {    const list = $('#historyList');
-    if (!S.history.length) {
-      list.innerHTML = '<li class="history-empty">还没抽过签。按空格试试？</li>';
-      return;
-    }
-    list.innerHTML = S.history.map((h, i) => {
-      const d = DIFF_BY_V.get(h.diff);
-      const s = SQUAD_BY_ID.get(h.squad);
-      const c = COMBO_BY_ID.get(h.combo);
-      if (!d || !s || !c) return '';
-      const t = new Date(h.at);
-      const hh = String(t.getHours()).padStart(2, '0');
-      const mm = String(t.getMinutes()).padStart(2, '0');
-      return '<li><button type="button" class="hist-item" data-idx="' + i + '">' +
-        '<span class="hist-time">' + hh + ':' + mm + '</span>' +
-        '<span class="hist-main">难度 <span class="hl">' + d.v + '</span> · ' + esc(s.name) + ' · ' + esc(c.name) + '</span>' +
-        '<span class="hist-id">#' + esc(h.id || '------') + '</span>' +
-        '</button></li>';
-    }).join('');
-  }
-
-  /* ---------------- 干员禁选 UI ---------------- */
-  function syncBanUI() {
-    const chk = $('#chkBan');
-    if (!chk) return;
-    chk.checked = S.ban.enabled;
-    let idx = BAN_LV_STOPS.findIndex((v) => v >= S.ban.minLevel);
-    if (idx < 0) idx = BAN_LV_STOPS.length - 1;
-    $('#rngBanLv').value = String(idx);
-    $('#outBanLv').textContent = String(S.ban.minLevel);
-    renderBanChips();
-    updateBoxStatus();
+    bodyUnlock();
   }
 
   function openPool() {
     renderPool();
     $('#poolModal').hidden = false;
-    document.body.style.overflow = 'hidden';
+    bodyLock();
   }
   function closePool() {
     $('#poolModal').hidden = true;
-    if (!$('#drawer').classList.contains('open') && $('#historyModal').hidden) {
-      document.body.style.overflow = '';
-    }
+    bodyUnlock();
   }
   function openHow() {
     $('#howModal').hidden = false;
-    document.body.style.overflow = 'hidden';
+    bodyLock();
   }
   function closeHow() {
     $('#howModal').hidden = true;
-    if (!$('#drawer').classList.contains('open') && $('#historyModal').hidden && $('#poolModal').hidden) {
-      document.body.style.overflow = '';
+    bodyUnlock();
+  }
+
+  function renderHistory() {
+    const list = $('#historyList');
+    if (!S.history.length) {
+      list.innerHTML = '<li class="history-empty">还没抽过签。按空格试试？</li>';
+      return;
     }
+    list.innerHTML = S.history.map((h, i) => {
+      const t = THEME_BY_ID.get(h.theme);
+      if (!t) return '';
+      const d = t.difficulties.filter((x) => x.v === h.diff)[0];
+      const s = t.squads.filter((x) => x.id === h.squad)[0];
+      const c = t.combos.filter((x) => x.id === h.combo)[0];
+      if (!d || !s || !c) return '';
+      const dt = new Date(h.at);
+      const hh = String(dt.getHours()).padStart(2, '0');
+      const mm = String(dt.getMinutes()).padStart(2, '0');
+      return '<li><button type="button" class="hist-item" data-idx="' + i + '">' +
+        '<span class="hist-time">' + hh + ':' + mm + '</span>' +
+        '<span class="hist-main"><em>' + esc(t.short) + '</em> ' + t.diffLabel + ' <span class="hl">' + d.v +
+        '</span> · ' + esc(s.name) + ' · ' + esc(c.name) + '</span>' +
+        '<span class="hist-id">#' + esc(h.id || '------') + '</span>' +
+        '</button></li>';
+    }).join('');
+  }
+
+  /* ---------------- 主题切换 ---------------- */
+  function applyThemeCss() {
+    const t = cur();
+    document.documentElement.setAttribute('data-theme', t.css || 'blackflow');
+    document.documentElement.setAttribute('data-code', t.code);
+    if (el('brandCode')) el('brandCode').textContent = t.code.replace('IS', '');
+    if (el('brandName')) el('brandName').textContent = t.short;
+  }
+
+  function switchTheme(id, silent) {
+    if (!THEME_BY_ID.has(id) || id === S.theme) return;
+    S.theme = id;
+    S.current = null;
+    S.locks = { difficulty: false, squad: false, combo: false };
+    applyThemeCss();
+    renderThemeTabs();
+    renderChips();
+    syncRangeInputs();
+    renderLocks();
+    buildGauge();
+    updateConstraintLine();
+    updateBoxStatus();
+    renderFooter(null);
+    ['difficulty', 'squad', 'combo'].forEach((k) => {
+      $('#v-' + k).textContent = '—';
+      $('#s-' + k).textContent = k === 'difficulty' ? cur().diffLabel : (k === 'squad' ? '探索分队' : '初始招募组合');
+      $('#d-' + k).innerHTML = '按下「抽签」，让' + (cur().css === 'jieyuan' ? '岁' : '黑流') + '替你做决定。';
+    });
+    $('#extraLine').hidden = true;
+    $('#banPanel').hidden = true;
+    save();
+    setTimeout(roll, silent ? 60 : 120);
+  }
+
+  /* ---------------- 绑定 ---------------- */
+  function on(id, ev, fn) {
+    const node = document.getElementById(id);
+    if (node) node.addEventListener(ev, fn);
   }
 
   function applyBanChange() {
@@ -2128,14 +2567,7 @@ window.GAME_DATA = {
       paintResult(S.current, false);
     }
     updateBoxStatus();
-    if (!$('#poolModal').hidden) renderPool();
     save();
-  }
-
-  /* ---------------- 绑定 ---------------- */
-  function on(id, ev, fn) {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener(ev, fn);
   }
 
   function bindUI() {
@@ -2150,6 +2582,20 @@ window.GAME_DATA = {
     on('btnHistory', 'click', openHistory);
     on('btnCloseHistory', 'click', closeHistory);
     on('historyModal', 'click', (e) => { if (e.target.id === 'historyModal') closeHistory(); });
+    on('btnOpenPool', 'click', () => { poolQuery = ''; if (el('poolSearch')) el('poolSearch').value = ''; openPool(); });
+    on('btnClosePool', 'click', closePool);
+    on('poolModal', 'click', (e) => { if (e.target.id === 'poolModal') closePool(); });
+    on('btnBanHelp', 'click', openHow);
+    on('btnCloseHow', 'click', closeHow);
+    on('howModal', 'click', (e) => { if (e.target.id === 'howModal') closeHow(); });
+
+    /* 主题 */
+    if (el('themeTabs')) {
+      el('themeTabs').addEventListener('click', (e) => {
+        const b = e.target.closest('.theme-tab');
+        if (b) switchTheme(b.dataset.theme);
+      });
+    }
 
     /* 锁定 */
     $$('.lock-btn').forEach((btn) => {
@@ -2165,17 +2611,19 @@ window.GAME_DATA = {
 
     /* 难度滑杆 */
     on('rngMin', 'input', () => {
-      let v = clamp(+$('#rngMin').value, 0, MAX_D);
-      if (v > S.diffMax) S.diffMax = v;
-      S.diffMin = v;
+      const max = cur().maxDifficulty;
+      let v = clamp(+$('#rngMin').value, 0, max);
+      if (v > cfg().diffMax) cfg().diffMax = v;
+      cfg().diffMin = v;
       syncRangeInputs();
       updateConstraintLine();
       save();
     });
     on('rngMax', 'input', () => {
-      let v = clamp(+$('#rngMax').value, 0, MAX_D);
-      if (v < S.diffMin) S.diffMin = v;
-      S.diffMax = v;
+      const max = cur().maxDifficulty;
+      let v = clamp(+$('#rngMax').value, 0, max);
+      if (v < cfg().diffMin) cfg().diffMin = v;
+      cfg().diffMax = v;
       syncRangeInputs();
       updateConstraintLine();
       save();
@@ -2185,45 +2633,49 @@ window.GAME_DATA = {
     $$('#presetRow button').forEach((btn) => {
       btn.addEventListener('click', () => {
         const p = btn.dataset.preset;
-        if (p === 'easy') { S.diffMin = 0; S.diffMax = 6; }
-        if (p === 'std') { S.diffMin = 0; S.diffMax = 12; }
-        if (p === 'hard') { S.diffMin = 10; S.diffMax = MAX_D; }
-        if (p === 'all') { S.diffMin = 0; S.diffMax = MAX_D; }
+        const max = cur().maxDifficulty;
+        if (p === 'easy') { cfg().diffMin = 0; cfg().diffMax = 6; }
+        if (p === 'std') { cfg().diffMin = 0; cfg().diffMax = Math.min(12, max); }
+        if (p === 'hard') { cfg().diffMin = 10; cfg().diffMax = max; }
+        if (p === 'all') { cfg().diffMin = 0; cfg().diffMax = max; }
         syncRangeInputs();
         updateConstraintLine();
         save();
       });
     });
 
-    /* 分队 chips */
-    $('#squadChips').addEventListener('click', (e) => {
-      const chip = e.target.closest('.chip');
-      if (!chip) return;
-      toggleExclude('squad', chip.dataset.squad);
-    });
-
-    $('#comboChips').addEventListener('click', (e) => {
-      const chip = e.target.closest('.chip');
-      if (!chip) return;
-      toggleExclude('combo', chip.dataset.combo);
-    });
+    /* 分队 / 组合 chips */
+    if (el('squadChips')) {
+      el('squadChips').addEventListener('click', (e) => {
+        const chip = e.target.closest('.chip');
+        if (chip) toggleExclude('squad', chip.dataset.squad);
+      });
+    }
+    if (el('comboChips')) {
+      el('comboChips').addEventListener('click', (e) => {
+        const chip = e.target.closest('.chip');
+        if (chip) toggleExclude('combo', chip.dataset.combo);
+      });
+    }
 
     /* chip 工具栏 */
     $$('.chip-tools button').forEach((btn) => {
       btn.addEventListener('click', () => {
         const k = btn.dataset.chip;
         if (!k) return;
+        const t = cur();
         if (k === 'all') setExcluded('squad', []);
-        if (k === 'none') setExcluded('squad', D.squads.map((s) => s.id));
+        if (k === 'none') setExcluded('squad', t.squads.map((s) => s.id));
         if (k === 'invert') {
-          const inv = D.squads.filter((s) => S.excludedSquads.indexOf(s.id) === -1).map((s) => s.id);
-          if (inv.length >= D.squads.length) { toast('全排除没法抽签，至少要留一个'); }
-          else S.excludedSquads = inv;
+          const c = cfg();
+          const inv = t.squads.filter((s) => c.excludedSquads.indexOf(s.id) === -1).map((s) => s.id);
+          if (inv.length >= t.squads.length) { toast('全排除没法抽签，至少要留一个'); }
+          else S.cfg[S.theme].excludedSquads = inv;
         }
-        if (k === 'reset') S.excludedSquads = DEFAULT_EXCLUDED_SQUADS.slice();
+        if (k === 'reset') S.cfg[S.theme].excludedSquads = (t.defaultExcludeSquads || []).slice();
         if (k === 'all-c') setExcluded('combo', []);
-        if (k === 'none-c') setExcluded('combo', D.combos.map((c) => c.id));
-        if (k === 'reset-c') S.excludedCombos = DEFAULT_EXCLUDED_COMBOS.slice();
+        if (k === 'none-c') setExcluded('combo', t.combos.map((c) => c.id));
+        if (k === 'reset-c') S.cfg[S.theme].excludedCombos = (t.defaultExcludeCombos || []).slice();
         refreshChipStates();
       });
     });
@@ -2234,7 +2686,6 @@ window.GAME_DATA = {
       updateConstraintLine();
       save();
       if (S.current && !S.rolling) {
-        /* 立即给当前结果补一条 / 去掉一条，体验更顺 */
         if (S.house && !S.current.house) S.current.house = pick(D.houseRules);
         if (!S.house) S.current.house = null;
         paintResult(S.current, false);
@@ -2246,6 +2697,7 @@ window.GAME_DATA = {
     on('chkBan', 'change', () => {
       S.ban.enabled = $('#chkBan').checked;
       applyBanChange();
+      if (S.current) paintResult(S.current, false);
     });
 
     on('rngBanLv', 'input', () => {
@@ -2255,8 +2707,8 @@ window.GAME_DATA = {
       applyBanChange();
     });
 
-    if ($('#banClassChips')) {
-      $('#banClassChips').addEventListener('click', (e) => {
+    if (el('banClassChips')) {
+      el('banClassChips').addEventListener('click', (e) => {
         const chip = e.target.closest('.chip');
         if (!chip) return;
         const c = chip.dataset.banclass;
@@ -2271,23 +2723,38 @@ window.GAME_DATA = {
       });
     }
 
-    on('btnOpenPool', 'click', openPool);
-    on('btnClosePool', 'click', closePool);
-    on('poolModal', 'click', (e) => { if (e.target.id === 'poolModal') closePool(); });
-    on('btnBanHelp', 'click', openHow);
-    on('btnCloseHow', 'click', closeHow);
-    on('howModal', 'click', (e) => { if (e.target.id === 'howModal') closeHow(); });
+    /* 干员池 */
+    on('poolSearch', 'input', () => {
+      poolQuery = $('#poolSearch').value || '';
+      renderPool();
+    });
+    if (el('poolBody')) {
+      el('poolBody').addEventListener('click', (e) => {
+        const b = e.target.closest('.pool-op');
+        if (b) toggleOp(b.dataset.op);
+      });
+    }
+    on('poolAll', 'click', () => setAllHeld(true));
+    on('poolNone', 'click', () => setAllHeld(false));
+    on('poolReset', 'click', () => { S.held = {}; renderPool(); updateBoxStatus(); if (S.current) { S.current.bans = pickBans(); renderBans(S.current); } save(); });
 
     /* 重置 */
     on('btnReset', 'click', () => {
       const d = defaults();
-      Object.assign(S, d);
+      S.theme = d.theme;
+      S.cfg = d.cfg;
       S.locks = d.locks;
+      S.ban = d.ban;
+      S.held = {};
+      S.house = d.house;
+      applyThemeCss();
+      renderThemeTabs();
       renderChips();
       renderLocks();
       syncRangeInputs();
       renderHousePool();
       syncBanUI();
+      buildGauge();
       updateConstraintLine();
       save();
       toast('已恢复默认约束');
@@ -2300,15 +2767,15 @@ window.GAME_DATA = {
       toast('记录已清空');
     });
 
-    /* 记录点击复制 */
-    $('#historyList').addEventListener('click', (e) => {
-      const item = e.target.closest('.hist-item');
-      if (!item) return;
-      const h = S.history[+item.dataset.idx];
-      if (h) copyText(h.text);
-    });
+    if (el('historyList')) {
+      el('historyList').addEventListener('click', (e) => {
+        const item = e.target.closest('.hist-item');
+        if (!item) return;
+        const h = S.history[+item.dataset.idx];
+        if (h) copyText(h.text);
+      });
+    }
 
-    /* 键盘 */
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') { closeDrawer(); closeHistory(); closePool(); closeHow(); return; }
       if (e.code !== 'Space' || e.repeat) return;
@@ -2322,8 +2789,10 @@ window.GAME_DATA = {
   }
 
   function toggleExclude(kind, id) {
-    const arr = kind === 'squad' ? S.excludedSquads : S.excludedCombos;
-    const all = kind === 'squad' ? D.squads : D.combos;
+    const t = cur();
+    const c = cfg();
+    const arr = kind === 'squad' ? c.excludedSquads : c.excludedCombos;
+    const all = kind === 'squad' ? t.squads : t.combos;
     const i = arr.indexOf(id);
     if (i === -1) {
       if (arr.length >= all.length - 1) { toast('至少留一个可选项，不然抽不出来'); return; }
@@ -2335,28 +2804,45 @@ window.GAME_DATA = {
   }
 
   function setExcluded(kind, ids) {
-    const arr = kind === 'squad' ? S.excludedSquads : S.excludedCombos;
-    const all = kind === 'squad' ? D.squads : D.combos;
+    const t = cur();
+    const c = cfg();
+    const arr = kind === 'squad' ? c.excludedSquads : c.excludedCombos;
+    const all = kind === 'squad' ? t.squads : t.combos;
     if (ids.length >= all.length) { toast('全排除没法抽签，至少要留一个'); return; }
     arr.length = 0;
     ids.forEach((id) => arr.push(id));
   }
 
   function refreshChipStates() {
+    const c = cfg();
     $$('#squadChips .chip').forEach((chip) => {
-      chip.setAttribute('aria-pressed', S.excludedSquads.indexOf(chip.dataset.squad) === -1 ? 'true' : 'false');
+      chip.setAttribute('aria-pressed', c.excludedSquads.indexOf(chip.dataset.squad) === -1 ? 'true' : 'false');
     });
     $$('#comboChips .chip').forEach((chip) => {
-      chip.setAttribute('aria-pressed', S.excludedCombos.indexOf(chip.dataset.combo) === -1 ? 'true' : 'false');
+      chip.setAttribute('aria-pressed', c.excludedCombos.indexOf(chip.dataset.combo) === -1 ? 'true' : 'false');
     });
     updateCounts();
     updateConstraintLine();
     save();
   }
 
+  function syncBanUI() {
+    const chk = $('#chkBan');
+    if (!chk) return;
+    chk.checked = S.ban.enabled;
+    let idx = BAN_LV_STOPS.findIndex((v) => v >= S.ban.minLevel);
+    if (idx < 0) idx = BAN_LV_STOPS.length - 1;
+    $('#rngBanLv').value = String(idx);
+    $('#outBanLv').textContent = String(S.ban.minLevel);
+    renderBanChips();
+    updateBoxStatus();
+  }
+
   /* ---------------- 启动 ---------------- */
   function init() {
     load();
+    applyThemeCss();
+    renderThemeTabs();
     renderChips();
     renderHousePool();
     syncBanUI();
