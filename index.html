@@ -1,0 +1,2387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060a0b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="开局抽签">
+<meta name="description" content="明日方舟 集成战略「沉沦者的黑流树海」随机开局抽签：难度、分队、初始招募组合一把梭。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%230b1416'/%3E%3Crect x='3' y='3' width='26' height='26' rx='2' fill='none' stroke='%234fada6' stroke-width='1.5'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%238ef0df' font-family='monospace'%3E6%3C/text%3E%3C/svg%3E">
+<title>黑流树海 · 开局抽签</title>
+<style>
+/* =========================================================
+ * 沉沦者的黑流树海 · 开局抽签
+ * 纯静态、无外部依赖，断网也能跑。
+ * ========================================================= */
+
+:root {
+  --bg:        #060a0b;
+  --bg-2:      #0a1113;
+  --panel:     #0d1618;
+  --panel-2:   #101d1f;
+  --line:      rgba(126, 198, 188, .16);
+  --line-soft: rgba(126, 198, 188, .09);
+  --line-hot:  rgba(126, 198, 188, .42);
+  --text:      #e7f2f0;
+  --muted:     #86a09d;
+  --muted-2:   #5f7775;
+  --teal:      #4fada6;
+  --teal-hi:   #8ef0df;
+  --gold:      #e3c384;
+  --red:       #c8485a;
+  --purple:    #b98cf0;
+
+  --accent:      #4fada6;
+  --accent-soft: rgba(79, 173, 166, .14);
+
+  --font: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Hiragino Sans GB", system-ui, sans-serif;
+  --mono: "Bahnschrift", "DIN Alternate", "Cascadia Mono", "Consolas", ui-monospace, monospace;
+
+  --ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+* { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ---------- 背景 ---------- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(90rem 60rem at 78% -20%, rgba(38, 118, 110, .30), transparent 62%),
+    radial-gradient(70rem 50rem at 6% 110%, rgba(58, 34, 92, .22), transparent 60%),
+    radial-gradient(50rem 40rem at 50% 50%, rgba(10, 30, 30, .5), transparent 70%),
+    linear-gradient(180deg, #050a0b 0%, #070d0f 55%, #050909 100%);
+}
+.backdrop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(126, 198, 188, .045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(126, 198, 188, .045) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(80% 70% at 50% 30%, #000 20%, transparent 88%);
+  -webkit-mask-image: radial-gradient(80% 70% at 50% 30%, #000 20%, transparent 88%);
+}
+.backdrop::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(142, 240, 223, .5), transparent);
+  opacity: .5;
+}
+
+/* ---------- 框架 ---------- */
+.app {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 26px 30px 18px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 22px;
+}
+
+/* ---------- 顶栏 ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+
+.badge {
+  width: 44px; height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-content: center;
+  grid-auto-flow: column;
+  align-items: baseline;
+  gap: 1px;
+  border: 1px solid var(--line-hot);
+  background: linear-gradient(150deg, rgba(79, 173, 166, .18), rgba(79, 173, 166, .02));
+  color: var(--teal-hi);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .06em;
+  clip-path: polygon(0 0, 100% 0, 100% 68%, 70% 100%, 0 100%);
+}
+.badge-num { font-size: 18px; color: var(--text); }
+
+.brand-text { min-width: 0; }
+
+.eyebrow {
+  margin: 0 0 4px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .26em;
+  color: var(--muted-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+h1 {
+  margin: 0;
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+h1 em {
+  font-style: normal;
+  color: var(--teal);
+  margin-left: 6px;
+  font-weight: 500;
+}
+
+.top-actions { display: flex; gap: 8px; flex: 0 0 auto; }
+
+.ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, .02);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12.5px;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: color .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
+}
+.ghost-btn svg {
+  width: 14px; height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ghost-btn:hover {
+  color: var(--teal-hi);
+  border-color: var(--line-hot);
+  background: rgba(79, 173, 166, .08);
+}
+.ghost-btn:active { transform: translateY(1px); }
+
+/* ---------- 舞台 ---------- */
+.stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  min-height: 0;
+}
+
+.stage-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.stage-title {
+  font-size: 11px;
+  letter-spacing: .24em;
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+.stage-bar {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line), rgba(126, 198, 188, .02));
+}
+.stage-meta {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: var(--muted-2);
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+  padding: 16px 18px 18px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background:
+    radial-gradient(120% 90% at 50% -20%, var(--accent-soft), transparent 66%),
+    linear-gradient(165deg, rgba(23, 40, 42, .92) 0%, rgba(10, 17, 19, .96) 58%, rgba(7, 12, 13, .98) 100%);
+  overflow: hidden;
+  transition: border-color .3s var(--ease), box-shadow .3s var(--ease);
+  --accent: #4fada6;
+  --accent-soft: rgba(79, 173, 166, .14);
+}
+
+.slot::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent 88%);
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 55%, transparent) 46%, transparent 92%);
+  opacity: .85;
+}
+.slot::after {
+  content: "";
+  position: absolute;
+  right: -1px; bottom: -1px;
+  width: 18px; height: 18px;
+  background: linear-gradient(135deg, transparent 48%, var(--accent) 50%);
+  opacity: .45;
+  pointer-events: none;
+}
+
+.slot.locked {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: inset 0 0 0 1px var(--accent-soft), 0 0 24px -12px var(--accent);
+}
+
+.slot.flash { animation: slot-flash .7s var(--ease); }
+@keyframes slot-flash {
+  0%   { box-shadow: 0 0 0 0 var(--accent-soft), inset 0 0 34px -14px var(--accent); }
+  55%  { box-shadow: 0 0 0 5px transparent, inset 0 0 0 -2px var(--accent); }
+  100% { box-shadow: none; }
+}
+
+.slot-top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  position: relative;
+  z-index: 1;
+}
+
+.idx {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  color: var(--muted-2);
+}
+.slot-label {
+  font-size: 12px;
+  letter-spacing: .2em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.slot[data-slot="combo"] .slot-label { letter-spacing: .12em; }
+
+.lock-btn {
+  margin-left: auto;
+  width: 27px; height: 27px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--muted-2);
+  cursor: pointer;
+  transition: all .18s var(--ease);
+}
+.lock-btn svg {
+  width: 14px; height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+.lock-btn:hover { color: var(--teal-hi); border-color: var(--line); }
+.lock-btn[aria-pressed="true"] {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--accent-soft);
+}
+.slot.locked .slot-label::after {
+  content: " · 已锁";
+  color: var(--accent);
+  letter-spacing: .06em;
+  font-size: 11px;
+}
+
+.slot-main {
+  position: relative;
+  z-index: 1;
+  margin-top: 26px;
+  min-height: 86px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.big {
+  font-family: var(--mono);
+  line-height: .95;
+  letter-spacing: -.015em;
+  color: var(--text);
+  will-change: transform, opacity;
+}
+.slot[data-slot="difficulty"] .big { font-size: 84px; color: var(--accent); text-shadow: 0 0 40px var(--accent-soft); }
+.slot[data-slot="squad"] .big {
+  font-family: var(--font);
+  font-size: 29px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  line-height: 1.2;
+}
+.slot[data-slot="combo"] .big {
+  font-family: var(--font);
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: .1em;
+}
+
+.stage.rolling .slot:not(.locked) .big { animation: cycle .26s linear infinite; }
+.stage.rolling .slot:not(.locked) .sub,
+.stage.rolling .slot:not(.locked) .detail,
+.stage.rolling .slot:not(.locked) .gauge { opacity: .3; }
+.sub, .detail, .gauge { transition: opacity .2s var(--ease); }
+@keyframes cycle {
+  0%, 100% { opacity: 1; transform: translateY(0); }
+  50%      { opacity: .62; transform: translateY(-2px); }
+}
+
+.sub {
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: .12em;
+  color: var(--muted);
+}
+
+.detail {
+  position: relative;
+  z-index: 1;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line-soft);
+  font-size: 12.5px;
+  line-height: 1.72;
+  color: #a9c0bd;
+  margin-top: auto;
+  text-wrap: pretty;
+}
+
+/* 难度刻度 */
+.gauge {
+  display: flex;
+  gap: 3px;
+  align-items: stretch;
+  height: 22px;
+  margin-top: 16px;
+  position: relative;
+  z-index: 1;
+}
+.gauge i {
+  flex: 1;
+  border-radius: 1px;
+  background: rgba(126, 198, 188, .13);
+  transition: background .3s var(--ease), box-shadow .3s var(--ease), transform .3s var(--ease);
+}
+.gauge i.on {
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  transform: scaleY(1.12);
+}
+.gauge i.on.far { opacity: .55; }
+.gauge i.tick { background: rgba(126, 198, 188, .26); }
+.gauge i.tick.on { background: var(--accent); }
+
+.cls-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.cls {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  background: var(--accent-soft);
+  color: var(--teal-hi);
+  font-size: 11.5px;
+  letter-spacing: .06em;
+  border-radius: 2px;
+}
+.cls i {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--muted);
+}
+.cmt { display: block; }
+
+/* ---------- 控制条 ---------- */
+.controlbar {
+  display: grid;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+}
+
+.roll-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 66px;
+  padding: 0 18px;
+  border: 1px solid var(--line-hot);
+  border-radius: 2px;
+  background:
+    linear-gradient(100deg, rgba(79, 173, 166, .2), rgba(79, 173, 166, .05) 62%, rgba(79, 173, 166, .14));
+  color: var(--text);
+  font-family: inherit;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color .2s var(--ease), box-shadow .25s var(--ease), transform .12s var(--ease);
+  box-shadow: 0 0 34px -18px var(--teal);
+}
+.roll-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(115deg, rgba(142, 240, 223, .1) 0 1px, transparent 1px 9px);
+  opacity: 0;
+  transition: opacity .25s var(--ease);
+}
+.roll-btn:hover { border-color: var(--teal-hi); box-shadow: 0 0 40px -12px rgba(79, 173, 166, .65); }
+.roll-btn:hover::before { opacity: 1; }
+.roll-btn:active { transform: translateY(1px); }
+.roll-btn:disabled { cursor: default; }
+
+.roll-glyph {
+  color: var(--teal-hi);
+  font-size: 11px;
+  animation: spin 12s linear infinite;
+  transition: animation-duration .2s;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.roll-label {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: .42em;
+  text-indent: .42em;
+}
+.roll-btn kbd {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .12em;
+  color: var(--muted-2);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 2px 5px;
+}
+
+.roll-btn.busy { border-color: var(--teal-hi); }
+.roll-btn.busy .roll-glyph { animation-duration: .5s; }
+.roll-btn.busy .roll-label { color: var(--teal-hi); }
+
+.constraint-line {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted);
+  letter-spacing: .03em;
+}
+.constraint-line b {
+  color: var(--text);
+  font-weight: 500;
+  font-family: var(--mono);
+  letter-spacing: .02em;
+}
+.constraint-line .warn { color: var(--gold); }
+.constraint-line .sep { opacity: .35; margin: 0 7px; }
+
+.detail .unlock { font-size: 11.5px; color: var(--muted-2); letter-spacing: .02em; }
+
+/* ---------- 房规条 ---------- */
+.extras {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: -6px;
+  padding: 11px 14px;
+  border: 1px dashed var(--line);
+  border-radius: 2px;
+  background: rgba(227, 195, 132, .04);
+  font-size: 12.5px;
+  color: #cbbd9d;
+  animation: fade-up .35s var(--ease);
+}
+.extras-tag {
+  flex: 0 0 auto;
+  padding: 2px 7px;
+  border: 1px solid rgba(227, 195, 132, .35);
+  color: var(--gold);
+  font-size: 10.5px;
+  letter-spacing: .14em;
+  border-radius: 2px;
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- 页脚 ---------- */
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 13px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 11px;
+  letter-spacing: .05em;
+  color: var(--muted-2);
+}
+.footer .sep { opacity: .5; }
+.mono { font-family: var(--mono); }
+
+/* ---------- 抽屉 ---------- */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(2, 6, 7, .62);
+  backdrop-filter: blur(3px);
+  animation: fade-in .25s var(--ease);
+}
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.drawer {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  z-index: 50;
+  width: min(430px, 94vw);
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #0b1416, #070c0d);
+  border-left: 1px solid var(--line-hot);
+  transform: translateX(102%);
+  visibility: hidden;
+  transition: transform .38s var(--ease), visibility 0s .38s;
+  box-shadow: -30px 0 70px -30px #000;
+}
+.drawer.open { transform: none; visibility: visible; transition: transform .38s var(--ease), visibility 0s 0s; }
+
+.drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 22px 22px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.drawer-head h2 { margin: 0; font-size: 19px; font-weight: 600; letter-spacing: .1em; }
+
+.icon-btn {
+  width: 32px; height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .18s var(--ease);
+}
+.icon-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
+.icon-btn:hover { color: var(--teal-hi); border-color: var(--line-hot); }
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 22px 26px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(126, 198, 188, .25) transparent;
+}
+.drawer-body::-webkit-scrollbar { width: 7px; }
+.drawer-body::-webkit-scrollbar-thumb { background: rgba(126, 198, 188, .22); border-radius: 4px; }
+
+.fgroup {
+  padding: 20px 0;
+  border-bottom: 1px dashed var(--line-soft);
+}
+.fgroup-last { border-bottom: 0; }
+.fgroup h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: var(--text);
+}
+.fgroup h3 .count {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--muted-2);
+  letter-spacing: .04em;
+}
+.tag {
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  font-size: 9.5px;
+  letter-spacing: .1em;
+  color: var(--muted-2);
+  border-radius: 2px;
+}
+
+.hint {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--muted-2);
+}
+
+/* 预设 */
+.preset-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.preset-row button {
+  padding: 8px 4px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, .02);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: all .16s var(--ease);
+}
+.preset-row button:hover { border-color: var(--line-hot); color: var(--text); }
+.preset-row button.on {
+  border-color: var(--teal);
+  color: var(--teal-hi);
+  background: rgba(79, 173, 166, .13);
+}
+
+/* 滑杆 */
+.range-row { margin: 10px 0 4px; }
+.range-row label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11.5px;
+  color: var(--muted);
+  letter-spacing: .06em;
+  margin-bottom: 6px;
+}
+.range-row output {
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--teal-hi);
+}
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(79, 173, 166, .55), rgba(126, 198, 188, .12));
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: var(--teal-hi);
+  border: 2px solid #06201e;
+  box-shadow: 0 0 12px rgba(142, 240, 223, .6);
+  cursor: grab;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 11px; height: 11px;
+  border: 2px solid #06201e;
+  border-radius: 50%;
+  background: var(--teal-hi);
+}
+
+/* chips */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.chip {
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, .025);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: .03em;
+  cursor: pointer;
+  transition: all .16s var(--ease);
+  position: relative;
+}
+.chip:hover { border-color: var(--line-hot); }
+.chip[aria-pressed="true"] {
+  border-color: rgba(79, 173, 166, .5);
+  background: rgba(79, 173, 166, .1);
+  color: var(--teal-hi);
+}
+.chip[aria-pressed="false"] {
+  opacity: .42;
+  border-style: dashed;
+  text-decoration: line-through;
+  text-decoration-color: rgba(200, 72, 90, .7);
+  color: var(--muted);
+}
+.chip small {
+  display: block;
+  font-size: 9.5px;
+  letter-spacing: .04em;
+  color: var(--muted-2);
+  margin-top: 3px;
+}
+.chip[aria-pressed="true"] small { color: rgba(142, 240, 223, .55); }
+
+.chip-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.chip-tools button {
+  padding: 5px 9px;
+  border: 1px solid var(--line-soft);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all .16s var(--ease);
+}
+.chip-tools button:hover { color: var(--teal-hi); border-color: var(--line-hot); }
+
+/* 开关 */
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+.switch input { position: absolute; opacity: 0; pointer-events: none; }
+.track {
+  width: 40px; height: 22px;
+  flex: 0 0 40px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .04);
+  position: relative;
+  transition: all .2s var(--ease);
+}
+.knob {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: all .2s var(--ease);
+}
+.switch input:checked + .track {
+  border-color: var(--teal);
+  background: rgba(79, 173, 166, .22);
+}
+.switch input:checked + .track .knob {
+  left: 21px;
+  background: var(--teal-hi);
+  box-shadow: 0 0 10px rgba(142, 240, 223, .7);
+}
+.switch input:focus-visible + .track { outline: 2px solid var(--teal); outline-offset: 2px; }
+.switch-text { font-size: 12.5px; color: var(--text); }
+
+.pool {
+  margin: 10px 0 0;
+  padding-left: 16px;
+  font-size: 11.5px;
+  line-height: 1.85;
+  color: var(--muted-2);
+}
+.pool li::marker { color: rgba(126, 198, 188, .4); }
+
+/* ---------- 记录弹层 ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(2, 6, 7, .68);
+  backdrop-filter: blur(4px);
+  animation: fade-in .22s var(--ease);
+}
+.modal-card {
+  width: min(560px, 100%);
+  min-height: 220px;
+  max-height: min(76vh, 720px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-hot);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #0c1618, #080e0f);
+  box-shadow: 0 40px 90px -40px #000;
+  animation: pop .3s var(--ease);
+}
+@keyframes pop {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 20px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.modal-head h2 { margin: 0; font-size: 18px; letter-spacing: .1em; font-weight: 600; }
+.modal-hint { margin: 0; padding: 10px 20px 0; font-size: 11.5px; color: var(--muted-2); }
+
+.history-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 6px 12px 16px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.hist-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: all .15s var(--ease);
+}
+.hist-item:hover {
+  border-color: var(--line);
+  background: rgba(79, 173, 166, .06);
+}
+.hist-time { font-family: var(--mono); font-size: 10.5px; color: var(--muted-2); }
+.hist-main { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hist-main .hl { color: var(--teal-hi); }
+.hist-id { font-family: var(--mono); font-size: 10px; color: var(--muted-2); letter-spacing: .06em; }
+.history-empty {
+  padding: 26px 12px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--muted-2);
+}
+
+/* ---------- toast ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 34px;
+  z-index: 80;
+  transform: translate(-50%, 14px);
+  padding: 10px 18px;
+  border: 1px solid var(--line-hot);
+  border-radius: 2px;
+  background: #0d1a1c;
+  color: var(--teal-hi);
+  font-size: 12.5px;
+  letter-spacing: .05em;
+  box-shadow: 0 18px 40px -20px #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: all .25s var(--ease);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 940px) {
+  .app { padding: 20px 18px 14px; gap: 18px; }
+  .slots { grid-template-columns: 1fr; gap: 10px; }
+  .slot { min-height: 0; padding: 14px 16px 16px; }
+  .slot-main { margin-top: 14px; min-height: 0; }
+  .slot[data-slot="difficulty"] .big { font-size: 58px; }
+  .slot[data-slot="squad"] .big { font-size: 26px; }
+  .slot[data-slot="combo"] .big { font-size: 32px; }
+  .detail { margin-top: 12px; }
+  .controlbar {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    padding: 10px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+    margin: 0 -18px -6px;
+    padding-left: 18px;
+    padding-right: 18px;
+    background: linear-gradient(180deg, rgba(6, 10, 11, 0), rgba(6, 10, 11, .94) 34%);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+  }
+  .roll-btn { height: 54px; }
+  .constraint-line { font-size: 11.5px; }
+
+  /* 手机上把禁选 / 房规排在抽签按钮前面，免得被悬浮按钮挡住 */
+  .stage > .slots { order: 1; }
+  .stage > .extras { order: 2; }
+  .stage > .bans { order: 3; }
+  .stage > .controlbar { order: 4; }
+  h1 { font-size: 21px; }
+  .brand .eyebrow { display: none; }
+}
+
+@media (max-width: 560px) {
+  .app { padding: 16px 14px 12px; }
+  .controlbar { margin-left: -14px; margin-right: -14px; padding-left: 14px; padding-right: 14px; }
+  .stage-meta { display: none; }
+  .top-actions .ghost-btn span { display: none; }
+  .ghost-btn { padding: 0 10px; }
+  .badge { width: 38px; height: 38px; flex-basis: 38px; }
+  h1 { font-size: 18px; letter-spacing: .02em; }
+  h1 em { margin-left: 4px; }
+  .preset-row { grid-template-columns: repeat(2, 1fr); }
+  .footer { font-size: 10px; flex-wrap: wrap; gap: 6px; }
+  .hist-item { grid-template-columns: 40px minmax(0, 1fr); }
+  .hist-id { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ================= 干员禁选 ================= */
+.bans {
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 12px 14px 13px;
+  background:
+    linear-gradient(120deg, rgba(200, 72, 90, .07), rgba(13, 22, 24, .55) 55%);
+  animation: fade-up .35s var(--ease);
+}
+.bans-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.bans-title {
+  font-size: 11.5px;
+  letter-spacing: .22em;
+  color: #e8b7be;
+}
+.bans-sub {
+  font-size: 10.5px;
+  letter-spacing: .04em;
+  color: var(--muted-2);
+}
+.bans-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.ban-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, .025);
+  font-size: 12.5px;
+  letter-spacing: .02em;
+}
+.ban-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #cf5a67;
+  box-shadow: 0 0 8px rgba(207, 90, 103, .7);
+}
+.ban-class { font-size: 10px; letter-spacing: .1em; color: rgba(255, 255, 255, .52); }
+.ban-name { color: #ffdde1; }
+.ban-item.empty { opacity: .4; }
+.ban-item.empty .ban-name { color: var(--muted); }
+.ban-item.empty .ban-dot { background: var(--muted-2); box-shadow: none; }
+
+/* 识别名单弹层 */
+.modal-card-wide { width: min(720px, 100%); }
+.pool-body {
+  overflow-y: auto;
+  padding: 4px 20px 20px;
+  scrollbar-width: thin;
+}
+.pool-class { margin-top: 14px; }
+.pool-class h4 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .16em;
+  color: var(--muted);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.pool-class h4 span { font-family: var(--mono); font-size: 10px; color: var(--muted-2); }
+.pool-ops { display: flex; flex-wrap: wrap; gap: 6px; }
+.pool-op {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  font-size: 12px;
+  color: var(--text);
+}
+.pool-op .lv {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted-2);
+}
+.pool-op.elig {
+  border-color: rgba(207, 90, 103, .42);
+  background: rgba(200, 72, 90, .08);
+  color: #ffdde1;
+}
+.pool-op.noelig { opacity: .38; }
+.pool-empty { font-size: 12.5px; color: var(--muted-2); padding: 16px 0; }
+
+/* 识别说明 */
+.how-body { padding: 14px 22px 22px; font-size: 12.5px; line-height: 1.85; color: #a9c0bd; }
+.how-body ol { margin: 0; padding-left: 18px; }
+.how-body li { margin-bottom: 8px; }
+.how-body b { color: var(--text); font-weight: 500; }
+.how-body code {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  color: var(--teal-hi);
+  background: rgba(79, 173, 166, .07);
+}
+.how-body .hint { margin-top: 12px; }
+
+@media (max-width: 560px) {
+  .bans { padding: 10px 12px 11px; }
+  .bans-list { gap: 5px; }
+  .ban-item { padding: 5px 8px; font-size: 11.5px; }
+}
+</style>
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true"></div>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="badge">
+        <span>IS</span><span class="badge-num">6</span>
+      </div>
+      <div class="brand-text">
+        <p class="eyebrow">THE BLACK FLOW OF THE DROWNING SEEKERS</p>
+        <h1>黑流树海 <em>开局抽签</em></h1>
+      </div>
+    </div>
+
+    <nav class="top-actions">
+      <button class="ghost-btn" id="btnCopy" type="button" title="复制本次开局">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h9v11H9z"/><path d="M6 15H4V4h9v2"/></svg>
+        <span>复制</span>
+      </button>
+      <button class="ghost-btn" id="btnHistory" type="button" title="抽签记录">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        <span>记录</span>
+      </button>
+      <button class="ghost-btn" id="btnSettings" type="button" title="约束设置">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.8 12h2.4M18.8 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"/></svg>
+        <span>约束</span>
+      </button>
+    </nav>
+  </header>
+
+  <main class="stage" id="stage" aria-live="polite">
+
+    <div class="stage-head">
+      <span class="stage-title">本次开局</span>
+      <span class="stage-bar" aria-hidden="true"></span>
+      <span class="stage-meta">按空格重抽 · SPACE TO REROLL</span>
+    </div>
+
+    <div class="slots">
+
+      <article class="slot" data-slot="difficulty">
+        <div class="slot-top">
+          <span class="idx">01</span>
+          <span class="slot-label">难度</span>
+          <button class="lock-btn" data-lock="difficulty" type="button" aria-pressed="false" title="锁定该项，下次抽签保持不变">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="1.6"/><path d="M8.4 10.5V8a3.6 3.6 0 1 1 7.2 0v2.5"/></svg>
+          </button>
+        </div>
+        <div class="slot-main">
+          <div class="big" id="v-difficulty">—</div>
+          <div class="sub" id="s-difficulty">保密等级</div>
+        </div>
+        <div class="gauge" id="gauge" aria-hidden="true"></div>
+        <p class="detail" id="d-difficulty">按下「抽签」，让黑流替你做决定。</p>
+      </article>
+
+      <article class="slot" data-slot="squad">
+        <div class="slot-top">
+          <span class="idx">02</span>
+          <span class="slot-label">分队</span>
+          <button class="lock-btn" data-lock="squad" type="button" aria-pressed="false" title="锁定该项，下次抽签保持不变">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="1.6"/><path d="M8.4 10.5V8a3.6 3.6 0 1 1 7.2 0v2.5"/></svg>
+          </button>
+        </div>
+        <div class="slot-main">
+          <div class="big" id="v-squad">—</div>
+          <div class="sub" id="s-squad">探索分队</div>
+        </div>
+        <p class="detail" id="d-squad">分队效果会显示在这里。</p>
+      </article>
+
+      <article class="slot" data-slot="combo">
+        <div class="slot-top">
+          <span class="idx">03</span>
+          <span class="slot-label">初始招募组合</span>
+          <button class="lock-btn" data-lock="combo" type="button" aria-pressed="false" title="锁定该项，下次抽签保持不变">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="1.6"/><path d="M8.4 10.5V8a3.6 3.6 0 1 1 7.2 0v2.5"/></svg>
+          </button>
+        </div>
+        <div class="slot-main">
+          <div class="big" id="v-combo">—</div>
+          <div class="sub" id="s-combo">三张招募券</div>
+        </div>
+        <p class="detail" id="d-combo">组合里的职业会显示在这里。</p>
+      </article>
+
+    </div>
+
+    <div class="controlbar">
+      <button class="roll-btn" id="btnRoll" type="button">
+        <span class="roll-glyph" aria-hidden="true">◆</span>
+        <span class="roll-label">抽 签</span>
+        <kbd>Space</kbd>
+      </button>
+      <p class="constraint-line" id="constraintLine"></p>
+    </div>
+
+    <div class="extras" id="extraLine" hidden>
+      <span class="extras-tag">房规</span>
+      <span class="extras-text" id="extraText"></span>
+    </div>
+
+    <section class="bans" id="banPanel" hidden>
+      <div class="bans-head">
+        <span class="bans-title">干员禁选</span>
+        <span class="bans-sub" id="banSub">每个职业 1 名 · 来自你的 box</span>
+      </div>
+      <ul class="bans-list" id="banList"></ul>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span id="seedLine" class="mono">编号 —</span>
+    <span class="sep">/</span>
+    <span id="versionLine">沉沦者开局抽签 v0.1</span>
+    <span class="sep">/</span>
+    <span>数据参考 PRTS</span>
+  </footer>
+
+</div>
+
+<!-- ================= 约束抽屉 ================= -->
+<div class="scrim" id="scrim" hidden></div>
+
+<aside class="drawer" id="drawer" aria-hidden="true" aria-label="约束设置">
+  <div class="drawer-head">
+    <div>
+      <p class="eyebrow">CONSTRAINTS</p>
+      <h2>约束</h2>
+    </div>
+    <button class="icon-btn" id="btnCloseDrawer" type="button" aria-label="关闭">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+
+  <div class="drawer-body">
+
+    <section class="fgroup">
+      <h3>难度区间</h3>
+      <div class="preset-row" id="presetRow">
+        <button type="button" data-preset="easy">休闲 ≤6</button>
+        <button type="button" data-preset="std">标准 ≤12</button>
+        <button type="button" data-preset="hard">硬核 ≥10</button>
+        <button type="button" data-preset="all">全部 0–16</button>
+      </div>
+
+      <div class="range-row">
+        <label for="rngMin">最低 <output id="outMin">0</output></label>
+        <input type="range" id="rngMin" min="0" max="16" step="1" value="0">
+      </div>
+      <div class="range-row">
+        <label for="rngMax">最高 <output id="outMax">12</output></label>
+        <input type="range" id="rngMax" min="0" max="16" step="1" value="12">
+      </div>
+      <p class="hint" id="diffHint">共 17 级（保密等级 0 – 16），区间内等概率。</p>
+    </section>
+
+    <section class="fgroup">
+      <h3>分队 <span class="count" id="squadCount"></span></h3>
+      <p class="hint">点亮 = 参与抽签；点暗 = 排除。默认排除「矛头分队」。</p>
+      <div class="chips" id="squadChips"></div>
+      <div class="chip-tools">
+        <button type="button" data-chip="all">全选</button>
+        <button type="button" data-chip="none">全排除</button>
+        <button type="button" data-chip="invert">反选</button>
+        <button type="button" data-chip="reset">默认</button>
+      </div>
+    </section>
+
+    <section class="fgroup">
+      <h3>初始招募组合 <span class="count" id="comboCount"></span></h3>
+      <p class="hint">「随心所欲」需要解锁，默认排除；已解锁就点亮它。</p>
+      <div class="chips" id="comboChips"></div>
+      <div class="chip-tools">
+        <button type="button" data-chip="all-c">全选</button>
+        <button type="button" data-chip="none-c">全排除</button>
+        <button type="button" data-chip="reset-c">默认</button>
+      </div>
+    </section>
+
+    <section class="fgroup">
+      <h3>附加调味 <span class="tag">可选</span></h3>
+      <label class="switch">
+        <input type="checkbox" id="chkHouse">
+        <span class="track" aria-hidden="true"><span class="knob"></span></span>
+        <span class="switch-text">每次附赠 1 条「房规」挑战</span>
+      </label>
+      <p class="hint">纯自定规则，想忽略就忽略。当前池子：</p>
+      <ul class="pool" id="housePool"></ul>
+    </section>
+
+    <section class="fgroup">
+      <h3>干员禁选 <span class="tag">新</span></h3>
+      <label class="switch">
+        <input type="checkbox" id="chkBan">
+        <span class="track" aria-hidden="true"><span class="knob"></span></span>
+        <span class="switch-text">每个职业禁选 1 名六星</span>
+      </label>
+      <p class="hint" id="boxStatus">尚未识别 box。</p>
+
+      <div class="range-row">
+        <label for="rngBanLv">最低等级 <output id="outBanLv">2</output></label>
+        <input type="range" id="rngBanLv" min="0" max="6" step="1" value="1">
+      </div>
+      <p class="hint">干员列表不显示精英化阶段，只能用等级近似：LV1 视为未精英化，≥2 视为精英一以上。想更严格就调高。</p>
+
+      <div class="chips" id="banClassChips"></div>
+      <div class="chip-tools">
+        <button type="button" id="btnOpenPool">查看识别名单</button>
+        <button type="button" id="btnBanHelp">怎么识别？</button>
+      </div>
+    </section>
+
+    <section class="fgroup fgroup-last">
+      <h3>其它</h3>
+      <div class="chip-tools">
+        <button type="button" id="btnReset">恢复全部默认</button>
+        <button type="button" id="btnClearHistory">清空记录</button>
+      </div>
+      <p class="hint">设置与记录都存在本机浏览器里，不会上传。</p>
+    </section>
+
+  </div>
+</aside>
+
+<!-- ================= 记录弹层 ================= -->
+<div class="modal" id="historyModal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-label="抽签记录">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">ROLL LOG</p>
+        <h2>抽签记录</h2>
+      </div>
+      <button class="icon-btn" id="btnCloseHistory" type="button" aria-label="关闭">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="modal-hint">点任意一条即可复制该次开局。</p>
+    <ol class="history-list" id="historyList"></ol>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ================= 识别名单 ================= -->
+<div class="modal" id="poolModal" hidden>
+  <div class="modal-card modal-card-wide" role="dialog" aria-modal="true" aria-label="识别名单">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">BOX SCAN</p>
+        <h2>识别名单</h2>
+      </div>
+      <button class="icon-btn" id="btnClosePool" type="button" aria-label="关闭">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="modal-hint" id="poolHint">—</p>
+    <div class="pool-body" id="poolBody"></div>
+  </div>
+</div>
+
+<!-- ================= 识别说明 ================= -->
+<div class="modal" id="howModal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-label="怎么识别">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">HOW TO SCAN</p>
+        <h2>怎么把 box 读进来</h2>
+      </div>
+      <button class="icon-btn" id="btnCloseHow" type="button" aria-label="关闭">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="how-body">
+      <ol>
+        <li>手机或 PC 打开游戏 <b>干员</b> 列表，把六星所在的部分<b>滚动截屏</b>，尽量一屏 8 个、两行。</li>
+        <li>把截图丢进程序目录的 <code>screenshots</code> 文件夹。</li>
+        <li>双击 <code>识别box.bat</code>（或运行 <code>python tools/recognize_box.py</code>）。</li>
+        <li>回来刷新本页面，约束面板里就会显示识别到的干员。</li>
+      </ol>
+      <p class="hint">识别用的是 Windows 自带的离线 OCR，不上传任何图片。名字认错会自动对照干员表纠正；认不出的卡不会进入禁选池，所以名单里缺人可以再补一张截图重新识别。</p>
+      <p class="hint">这一步需要 <b>Windows 电脑 + Python 3</b>；手机端暂时做不了。想在手机上抽签（含禁选），可以让跑过识别的电脑生成「我的 box」单文件版，把那个 HTML 发到手机。</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+ * 沉沦者的黑流树海 · 开局抽签  —— 数据层
+ * 想改内容只需要动这个文件，改完刷新页面即可。
+ * 数据参考：PRTS「沉沦者的黑流树海」页面（2026-11 抓取）
+ * --------------------------------------------------------- */
+
+window.GAME_DATA = {
+  meta: {
+    theme: "沉沦者的黑流树海",
+    en: "THE BLACK FLOW OF THE DROWNING SEEKERS",
+    code: "IS6",
+    version: "v0.2 原型",
+    maxDifficulty: 16,
+  },
+
+  /* 八大职业（顺序与游戏内一致） */
+  classes: ["先锋", "近卫", "重装", "狙击", "术师", "医疗", "辅助", "特种"],
+
+  /* 保密等级 0 – 16  -------------------------------------------------- */
+  difficulties: [
+    { v: 0,  desc: "敌人生命 -40%、攻击 -30%；初始生命上限更高，失败返还【特勤任务影像】", enemy: "—",  score: 0  },
+    { v: 1,  desc: "初始生命上限 -2；敌人生命 / 攻击 -20%",                            enemy: "—",  score: 5  },
+    { v: 2,  desc: "实托邦开始生成；敌人生命 / 攻击 -15%",                             enemy: "—",  score: 10 },
+    { v: 3,  desc: "1 个【险路尽头】不再提前揭示；敌人生命 / 攻击 -10%",               enemy: "—",  score: 15 },
+    { v: 4,  desc: "出现【“居民”据点】；失败不再返还收藏品",                            enemy: "—",  score: 20 },
+    { v: 5,  desc: "所有敌人最大生命 +30%",                                            enemy: "+1", score: 25 },
+    { v: 6,  desc: "实托邦生成更频繁，并获得【实托邦·方针】效果",                       enemy: "+2", score: 30 },
+    { v: 7,  desc: "零件箱初始容量 -2",                                                enemy: "+3", score: 35 },
+    { v: 8,  desc: "精英及领袖敌人攻击力 +15%",                                        enemy: "+5", score: 40 },
+    { v: 9,  desc: "进入下一区域时损失 10% 源石锭",                                     enemy: "+6", score: 45 },
+    { v: 10, desc: "可同时部署人数 -1；初始生命上限 -2",                                enemy: "+7", score: 50 },
+    { v: 11, desc: "领袖敌人受到的伤害降低 20%",                                        enemy: "+8", score: 50 },
+    { v: 12, desc: "实托邦影响范围扩大，生成概率进一步提升",                            enemy: "+10", score: 50 },
+    { v: 13, desc: "非初始五星干员希望 +1；玻利瓦尔防御力 +50%；未熄之地额外灼燃",      enemy: "+12", score: 50 },
+    { v: 14, desc: "猎犬 proto 进点行动力 -1；源阶方生命 200%，全场每秒 -100 生命",     enemy: "+16", score: 50 },
+    { v: 15, desc: "非初始六星干员希望 +1；猎犬 proto 生命 150% 且为卡德霍回血",        enemy: "+20", score: 50 },
+    { v: 16, desc: "险路尽头不再获得加工品；行商刷新价格 +4",                           enemy: "+25", score: 50 },
+  ],
+  difficultyNote: "「内容拓展·Ⅰ」新增 16 级；11 级起为高难区，谨慎选择。",
+
+  /* 分队 --------------------------------------------------------------- */
+  squads: [
+    { id: "benyuan",  name: "本源研修分队", expansion: false, unlock: "初始解锁",
+      effect: "招募 / 进阶 4★ 以上【本源术师】【本源铁卫】【本源近卫】【巫役】希望 -2；初始携带【河谷祭祈】" },
+
+    { id: "wenming",  name: "文明开化分队", expansion: false, unlock: "生命游戏·羽毛",
+      effect: "消除实托邦中的理想源，获得 2 行动力 + 1 个随机收藏品；升级后不受【实托邦·方针】影响" },
+
+    { id: "kaituo",   name: "开拓者分队", expansion: false, unlock: "生命游戏·蹄",
+      effect: "初始携带 1 个（升级后为稀有的）加工品；进入新区域时获得 1 个随机加工品或概念体" },
+
+    { id: "duobian",  name: "多边贸易分队", expansion: false, unlock: "生命游戏·鳃",
+      effect: "零件箱容量 +2；同一行商节点卖出 3 个零件后获得 8 源石锭；进入行商节点获得【枯苔藓球】" },
+
+    { id: "dizhi",    name: "地质调查分队", expansion: false, unlock: "初始解锁",
+      effect: "初始携带【黑流树海笔记】，可通过探访不同类型的节点提升战斗后收藏品掉落概率" },
+
+    { id: "zhihui",   name: "指挥分队", expansion: false, unlock: "初始解锁",
+      effect: "目标生命上限 +2；每次战斗结束额外回复 1 目标生命（3+ 难度下护盾低于 5 时 +1 护盾）" },
+
+    { id: "teqin",    name: "特勤分队", expansion: false, unlock: "初始解锁",
+      effect: "可携带干员 +2、同时部署人数 +2；初始招募 5 名罗德岛预备干员（精 2 机械师后额外附带机械师）" },
+
+    { id: "houqin",   name: "后勤分队", expansion: false, unlock: "初始解锁",
+      effect: "初始源石锭 +20、希望 +2（6+ 难度额外携带【多生苔藓】）" },
+
+    { id: "maotou",   name: "矛头分队", expansion: false, unlock: "初始解锁",
+      effect: "初始目标生命值变为 1；所有我方单位攻 / 防 / 生命 +15%（9+ 难度携带【时光之末】）" },
+
+    { id: "tuji",     name: "突击战术分队", expansion: false, unlock: "近卫 / 先锋合计 ≥ 5 名通关结局",
+      effect: "招募 / 进阶 4★ 以上【近卫】【先锋】希望 -2 / -1；首个该职业干员必定直升" },
+
+    { id: "baolei",   name: "堡垒战术分队", expansion: false, unlock: "重装 / 辅助合计 ≥ 5 名通关结局",
+      effect: "招募 / 进阶 4★ 以上【重装】【辅助】希望 -2 / -1；首个该职业干员必定直升" },
+
+    { id: "yuancheng",name: "远程战术分队", expansion: false, unlock: "医疗 / 狙击合计 ≥ 5 名通关结局",
+      effect: "招募 / 进阶 4★ 以上【医疗】【狙击】希望 -2 / -1；首个该职业干员必定直升" },
+
+    { id: "pohuai",   name: "破坏战术分队", expansion: false, unlock: "术师 / 特种合计 ≥ 5 名通关结局",
+      effect: "招募 / 进阶 4★ 以上【术师】【特种】希望 -2 / -1；首个该职业干员必定直升" },
+
+    { id: "gaotai",   name: "高台突破分队", expansion: false, unlock: "高台合计 ≥ 4 名通关结局",
+      effect: "招募 4★ 及以上【术师】【狙击】【医疗】【辅助】希望 -2" },
+
+    { id: "dimian",   name: "地面突破分队", expansion: false, unlock: "地面合计 ≥ 4 名通关结局",
+      effect: "招募 4★ 及以上【先锋】【近卫】【重装】【特种】希望 -2" },
+
+    { id: "tuanjie",  name: "团结阵线分队", expansion: true, unlock: "内容拓展Ⅰ + 完成一次结局",
+      effect: "应急助力刷新不再消耗源石锭；初始携带【似曾相识棋盒】；同时部署 +1，进新区获得应急干员" },
+
+    { id: "tazhu",    name: "踏足遍历分队", expansion: true, unlock: "内容拓展Ⅰ + 完成一次结局",
+      effect: "使用加工品移动后随机揭露 3 处节点视野；初始携带【去踏足】；本区域视野全开则获得源石锭" },
+  ],
+
+  /* 初始招募组合 -------------------------------------------------------- */
+  combos: [
+    { id: "xianshou", name: "先手必胜", classes: ["先锋", "狙击", "特种"], desc: "开局即施压，费用、位移与飞行单位处理一手抓" },
+    { id: "wenza",    name: "稳扎稳打", classes: ["重装", "术师", "狙击"], desc: "有坦有输出，最百搭的攻守配置" },
+    { id: "quchang",  name: "取长补短", classes: ["近卫", "辅助", "医疗"], desc: "近卫扛线，辅助与医疗负责续航和控制" },
+    { id: "linghuo",  name: "灵活部署", classes: ["先锋", "辅助", "特种"], desc: "费用、位移、控制拉满，吃操作上限" },
+    { id: "jianbu",   name: "坚不可摧", classes: ["重装", "术师", "医疗"], desc: "铁壁防线流，慢热但稳" },
+    { id: "suixin",   name: "随心所欲", classes: [], locked: true,
+      desc: "第一张必为 5★ 临时招募券，后两张从地面 / 高台职业中随机" },
+  ],
+
+  /* 随心所欲：第二 / 第三张券的可能职业 ---------------------------------- */
+  suixinPool: {
+    second: ["先锋", "近卫", "重装", "特种"],
+    third:  ["狙击", "术师", "医疗", "辅助"],
+    first:  "5★ 临时",
+  },
+
+  /* 附加调味（房规，可选） ----------------------------------------------- */
+  houseRules: [
+    "全程不使用助战干员",
+    "初始招募不选六星干员",
+    "每层至少完成 1 次紧急作战",
+    "全程不在诡意行商购买收藏品",
+    "全程不刷新商店库存",
+    "每次作战至少编入 1 名 3★ 或以下干员",
+    "全程不使用战术道具",
+    "每层至少触发 1 次【狭路相逢】",
+  ],
+};
+
+</script>
+<script>window.BOX = null;</script>
+<script>
+/* =========================================================
+ * 沉沦者的黑流树海 · 开局抽签  —— 逻辑层
+ * 无框架、无依赖，file:// 双击即可运行。
+ * ========================================================= */
+(function () {
+  'use strict';
+
+  const D = window.GAME_DATA;
+  if (!D) { console.error('data.js 未加载'); return; }
+
+  const $ = (sel, root) => (root || document).querySelector(sel);
+  const $$ = (sel, root) => Array.prototype.slice.call((root || document).querySelectorAll(sel));
+  const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  const KEY = 'is6-roller-state-v1';
+  const MAX_D = D.meta.maxDifficulty;
+  const CLASSES = D.classes;
+  const BOX = window.BOX || null;
+  const BAN_LV_STOPS = [1, 2, 10, 30, 60, 80, 90];
+
+  const SQUAD_BY_ID = new Map(D.squads.map((s) => [s.id, s]));
+  const COMBO_BY_ID = new Map(D.combos.map((c) => [c.id, c]));
+  const DIFF_BY_V = new Map(D.difficulties.map((d) => [d.v, d]));
+
+  /* 难度色带 */
+  const BANDS = [
+    { max: 4,  color: '#6fd3a4', soft: 'rgba(111, 211, 164, .13)' },
+    { max: 9,  color: '#54b7b0', soft: 'rgba(84, 183, 176, .13)' },
+    { max: 10, color: '#d9a95c', soft: 'rgba(217, 169, 92, .13)' },
+    { max: 15, color: '#cf5a67', soft: 'rgba(207, 90, 103, .15)' },
+    { max: 99, color: '#b98cf0', soft: 'rgba(185, 140, 240, .15)' },
+  ];
+  const bandOf = (v) => BANDS.find((b) => v <= b.max) || BANDS[BANDS.length - 1];
+  const bandLabel = (v) => (v <= 4 ? '低难' : v <= 10 ? '中坚' : v <= 15 ? '高难' : '极限');
+
+  const DEFAULT_EXCLUDED_SQUADS = D.squads.filter((s) => s.id === 'maotou').map((s) => s.id);
+  const DEFAULT_EXCLUDED_COMBOS = D.combos.filter((c) => c.locked).map((c) => c.id);
+
+  function defaults() {
+    return {
+      diffMin: 0,
+      diffMax: 12,
+      excludedSquads: DEFAULT_EXCLUDED_SQUADS.slice(),
+      excludedCombos: DEFAULT_EXCLUDED_COMBOS.slice(),
+      house: false,
+      locks: { difficulty: false, squad: false, combo: false },
+      ban: { enabled: false, minLevel: 2, classes: CLASSES.slice() },
+    };
+  }
+
+  /* ---------------- 状态 ---------------- */
+  const S = Object.assign(defaults(), { history: [], current: null, rolling: false });
+
+  function load() {
+    let raw = null;
+    try { raw = localStorage.getItem(KEY); } catch (e) { return; }
+    if (!raw) return;
+    let o;
+    try { o = JSON.parse(raw); } catch (e) { return; }
+    if (!o || typeof o !== 'object') return;
+
+    if (Number.isFinite(o.diffMin)) S.diffMin = clamp(o.diffMin | 0, 0, MAX_D);
+    if (Number.isFinite(o.diffMax)) S.diffMax = clamp(o.diffMax | 0, 0, MAX_D);
+    if (Array.isArray(o.excludedSquads)) S.excludedSquads = o.excludedSquads.filter((id) => SQUAD_BY_ID.has(id));
+    if (Array.isArray(o.excludedCombos)) S.excludedCombos = o.excludedCombos.filter((id) => COMBO_BY_ID.has(id));
+    if (typeof o.house === 'boolean') S.house = o.house;
+    if (o.locks && typeof o.locks === 'object') {
+      S.locks = {
+        difficulty: !!o.locks.difficulty,
+        squad: !!o.locks.squad,
+        combo: !!o.locks.combo,
+      };
+    }
+    if (o.ban && typeof o.ban === 'object') {
+      S.ban.enabled = !!o.ban.enabled;
+      if (Number.isFinite(o.ban.minLevel)) S.ban.minLevel = clamp(o.ban.minLevel | 0, 1, 90);
+      if (Array.isArray(o.ban.classes)) {
+        const valid = o.ban.classes.filter((c) => CLASSES.indexOf(c) !== -1);
+        if (valid.length) S.ban.classes = valid;
+      }
+    }
+    if (Array.isArray(o.history)) {
+      S.history = o.history.filter((h) => h && h.text && Number.isFinite(h.at)).slice(0, 40);
+    }
+    if (o.current && validate(o.current)) S.current = o.current;
+  }
+
+  function validate(r) {
+    return r && Number.isFinite(r.diff) && DIFF_BY_V.has(r.diff) && SQUAD_BY_ID.has(r.squad) && COMBO_BY_ID.has(r.combo);
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify({
+        diffMin: S.diffMin, diffMax: S.diffMax,
+        excludedSquads: S.excludedSquads,
+        excludedCombos: S.excludedCombos,
+        house: S.house,
+        locks: S.locks,
+        ban: S.ban,
+        history: S.history.slice(0, 40),
+        current: S.current,
+      }));
+    } catch (e) { /* 隐身模式等情况忽略 */ }
+  }
+
+  /* ---------------- 池子 ---------------- */
+  function range() {
+    return S.diffMin <= S.diffMax ? [S.diffMin, S.diffMax] : [S.diffMax, S.diffMin];
+  }
+
+  function buildPool() {
+    const [lo, hi] = range();
+    const diffs = D.difficulties.filter((d) => d.v >= lo && d.v <= hi);
+    const squads = D.squads.filter((s) => S.excludedSquads.indexOf(s.id) === -1);
+    const combos = D.combos.filter((c) => S.excludedCombos.indexOf(c.id) === -1);
+    if (!squads.length) return { error: '没有可用的分队了，去「约束」里放开一个' };
+    if (!combos.length) return { error: '没有可用的招募组合了，去「约束」里放开一个' };
+    if (!diffs.length) return { error: '难度区间为空，调整一下最高/最低' };
+    return { diffs, squads, combos };
+  }
+
+  /* ---------------- 抽签 ---------------- */
+  function makeId() {
+    const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let out = '';
+    for (let i = 0; i < 6; i++) out += abc[Math.floor(Math.random() * abc.length)];
+    return out;
+  }
+
+  function rollClassesFor(combo) {
+    if (combo.id !== 'suixin') return null;
+    return [
+      D.suixinPool.first,
+      pick(D.suixinPool.second),
+      pick(D.suixinPool.third),
+    ];
+  }
+
+  async function roll() {
+    if (S.rolling) return;
+    const pool = buildPool();
+    if (pool.error) { toast(pool.error); return; }
+
+    S.rolling = true;
+    const btn = $('#btnRoll');
+    btn.classList.add('busy');
+    btn.disabled = true;
+    $('#stage').classList.add('rolling');
+
+    const prev = S.current;
+    const diff = S.locks.difficulty && prev ? (DIFF_BY_V.get(prev.diff) || pick(pool.diffs)) : pick(pool.diffs);
+    const squad = S.locks.squad && prev ? (SQUAD_BY_ID.get(prev.squad) || pick(pool.squads)) : pick(pool.squads);
+    const combo = S.locks.combo && prev ? (COMBO_BY_ID.get(prev.combo) || pick(pool.combos)) : pick(pool.combos);
+
+    const jobs = [];
+    if (!(S.locks.difficulty && prev)) {
+      jobs.push(shuffle('difficulty', pool.diffs.map((d) => String(d.v)), String(diff.v), 560));
+    }
+    if (!(S.locks.squad && prev)) {
+      jobs.push(shuffle('squad', pool.squads.map((s) => s.name), squad.name, 720));
+    }
+    if (!(S.locks.combo && prev)) {
+      jobs.push(shuffle('combo', pool.combos.map((c) => c.name), combo.name, 880));
+    }
+    await Promise.all(jobs);
+
+    $('#stage').classList.remove('rolling');
+
+    const res = {
+      id: makeId(),
+      at: Date.now(),
+      diff: diff.v,
+      squad: squad.id,
+      combo: combo.id,
+      comboRoll: rollClassesFor(combo),
+      house: S.house ? pick(D.houseRules) : null,
+      bans: pickBans(),
+    };
+
+    S.current = res;
+    S.history.unshift(Object.assign({ text: buildText(res) }, res));
+    S.history = S.history.slice(0, 40);
+
+    paintResult(res, true);
+    renderFooter(res);
+    save();
+
+    btn.classList.remove('busy');
+    btn.disabled = false;
+    S.rolling = false;
+  }
+
+  function shuffle(key, labels, finalText, ms) {
+    return new Promise((resolve) => {
+      const el = $('#v-' + key);
+      const iv = setInterval(() => { el.textContent = pick(labels); }, 52);
+      setTimeout(() => {
+        clearInterval(iv);
+        el.textContent = finalText;
+        resolve();
+      }, ms);
+    });
+  }
+
+  /* ---------------- 渲染 ---------------- */
+  function setSlot(key, value, sub, detailHtml, color, soft) {
+    const slot = $('.slot[data-slot="' + key + '"]');
+    if (color) slot.style.setProperty('--accent', color);
+    if (soft) slot.style.setProperty('--accent-soft', soft);
+    $('#v-' + key).textContent = value;
+    $('#s-' + key).textContent = sub;
+    $('#d-' + key).innerHTML = detailHtml;
+  }
+
+  function paintResult(res, flash) {
+    const d = DIFF_BY_V.get(res.diff);
+    const s = SQUAD_BY_ID.get(res.squad);
+    const c = COMBO_BY_ID.get(res.combo);
+    if (!d || !s || !c) return;
+
+    const b = bandOf(d.v);
+    setSlot('difficulty', String(d.v),
+      '保密等级 · ' + bandLabel(d.v) + ' · 敌人难度 ' + d.enemy + ' · 得分 +' + d.score + '%',
+      esc(d.desc), b.color, b.soft);
+    updateGauge(d.v);
+
+    const unlockNote = s.unlock && s.unlock !== '初始解锁'
+      ? '<br><span class="unlock">解锁条件：' + esc(s.unlock) + '</span>' : '';
+    setSlot('squad', s.name,
+      '探索分队' + (s.expansion ? ' · 内容拓展Ⅰ' : ''),
+      esc(s.effect) + unlockNote,
+      s.expansion ? '#b98cf0' : '#4fada6',
+      s.expansion ? 'rgba(185, 140, 240, .14)' : 'rgba(79, 173, 166, .14)');
+
+    const chips = (c.id === 'suixin' && res.comboRoll)
+      ? res.comboRoll.map((x, i) => '<span class="cls"><i>' + (i + 1) + '</i>' + esc(x) + '</span>')
+      : c.classes.map((x) => '<span class="cls">' + esc(x) + '</span>');
+    setSlot('combo', c.name, '初始招募组合',
+      '<span class="cls-row">' + chips.join('') + '</span><span class="cmt">' + esc(c.desc) + '</span>',
+      '#4fada6', 'rgba(79, 173, 166, .14)');
+
+    const extra = $('#extraLine');
+    if (res.house) {
+      $('#extraText').textContent = res.house;
+      extra.hidden = false;
+    } else {
+      extra.hidden = true;
+    }
+
+    renderBans(res);
+
+    if (flash) {
+      ['difficulty', 'squad', 'combo'].forEach((key) => {
+        if (S.locks[key]) return;
+        const slot = $('.slot[data-slot="' + key + '"]');
+        slot.classList.remove('flash');
+        void slot.offsetWidth;
+        slot.classList.add('flash');
+      });
+    }
+  }
+
+  function buildGauge() {
+    const el = $('#gauge');
+    if (!el) return;
+    el.innerHTML = D.difficulties.map((d) => {
+      const tick = d.v === 3 || d.v === 6 || d.v === 9 || d.v === 12 || d.v === 16 ? ' tick' : '';
+      return '<i data-v="' + d.v + '" class="' + tick.trim() + '" title="保密等级 ' + d.v + '"></i>';
+    }).join('');
+  }
+
+  function updateGauge(v) {
+    $$('#gauge i').forEach((i) => {
+      i.classList.toggle('on', Number(i.dataset.v) === v);
+    });
+  }
+
+  function renderLocks() {    ['difficulty', 'squad', 'combo'].forEach((key) => {
+      const btn = $('[data-lock="' + key + '"]');
+      if (!btn) return;
+      const on = !!S.locks[key] && !!S.current;
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.closest('.slot').classList.toggle('locked', on);
+    });
+  }
+
+  function renderFooter(res) {
+    const id = res ? res.id : null;
+    $('#seedLine').textContent = id ? '编号 #' + id : '编号 —';
+    $('#versionLine').textContent = '沉沦者开局抽签 ' + D.meta.version;
+  }
+
+  function renderChips() {
+    const sq = $('#squadChips');
+    sq.innerHTML = D.squads.map((s) => {
+      const on = S.excludedSquads.indexOf(s.id) === -1;
+      let note = '';
+      if (s.expansion) note = '<small>拓展Ⅰ</small>';
+      else if (s.unlock !== '初始解锁') note = '<small>需解锁</small>';
+      return '<button type="button" class="chip" data-squad="' + s.id + '" aria-pressed="' + on + '" title="' +
+        esc(s.unlock) + '">' + esc(s.name) + note + '</button>';
+    }).join('');
+
+    const cb = $('#comboChips');
+    cb.innerHTML = D.combos.map((c) => {
+      const on = S.excludedCombos.indexOf(c.id) === -1;
+      const note = c.locked ? '<small>需解锁</small>' : '';
+      return '<button type="button" class="chip" data-combo="' + c.id + '" aria-pressed="' + on + '">' +
+        esc(c.name) + note + '</button>';
+    }).join('');
+
+    updateCounts();
+  }
+
+  function updateCounts() {
+    const nS = D.squads.length - S.excludedSquads.length;
+    const nC = D.combos.length - S.excludedCombos.length;
+    $('#squadCount').textContent = nS + ' / ' + D.squads.length;
+    $('#comboCount').textContent = nC + ' / ' + D.combos.length;
+  }
+
+  function updateConstraintLine() {
+    const [lo, hi] = range();
+    const nS = D.squads.length - S.excludedSquads.length;
+    const nC = D.combos.length - S.excludedCombos.length;
+    const locks = ['difficulty', 'squad', 'combo'].filter((k) => S.locks[k] && S.current).length;
+
+    let html = '难度 <b>' + lo + '–' + hi + '</b>' +
+      '<span class="sep">·</span>分队 <b>' + nS + '/' + D.squads.length + '</b>' +
+      '<span class="sep">·</span>组合 <b>' + nC + '/' + D.combos.length + '</b>';
+    if (locks) html += '<span class="sep">·</span>已锁 <b>' + locks + '</b> 项';
+    if (S.house) html += '<span class="sep">·</span>房规 <b>开</b>';
+
+    if (!nS || !nC) html += '<span class="sep">·</span><span class="warn">池子空了，去约束里放开一个</span>';
+
+    $('#constraintLine').innerHTML = html;
+    $('#diffHint').textContent = '当前区间 ' + lo + ' – ' + hi + '，共 ' + (hi - lo + 1) + ' 级，区间内等概率。';
+    $('#diffHint').title = D.difficultyNote;
+  }
+
+  function syncRangeInputs() {
+    const [lo, hi] = range();
+    $('#rngMin').value = String(lo);
+    $('#rngMax').value = String(hi);
+    $('#outMin').textContent = String(lo);
+    $('#outMax').textContent = String(hi);
+    markPreset();
+  }
+
+  function markPreset() {
+    const [lo, hi] = range();
+    let key = '';
+    if (lo === 0 && hi <= 6) key = 'easy';
+    else if (lo === 0 && hi === 12) key = 'std';
+    else if (lo >= 10) key = 'hard';
+    else if (lo === 0 && hi === MAX_D) key = 'all';
+    $$('#presetRow button').forEach((b) => b.classList.toggle('on', b.dataset.preset === key));
+  }
+
+  function renderHousePool() {
+    $('#housePool').innerHTML = D.houseRules.map((r) => '<li>' + esc(r) + '</li>').join('');
+    $('#chkHouse').checked = S.house;
+  }
+
+  /* ---------------- 干员禁选 ---------------- */
+  function eligiblePool() {
+    if (!BOX || !Array.isArray(BOX.operators)) return [];
+    return BOX.operators.filter((o) => o.rarity === 5 && (o.level || 0) >= S.ban.minLevel);
+  }
+
+  function pickBans() {
+    if (!BOX || !S.ban.enabled) return [];
+    const pool = eligiblePool();
+    const out = [];
+    CLASSES.forEach((c) => {
+      if (S.ban.classes.indexOf(c) === -1) return;
+      const cands = pool.filter((o) => o.class === c);
+      out.push(cands.length ? { c, n: pick(cands).name } : { c, n: null });
+    });
+    return out;
+  }
+
+  function renderBans(res) {
+    const panel = $('#banPanel');
+    const bans = (res && res.bans) || [];
+    if (!S.ban.enabled || !BOX || !bans.length) { panel.hidden = true; return; }
+    panel.hidden = false;
+    $('#banSub').textContent = '每职业 1 名 · ' + bans.length + ' 个职业参与';
+    $('#banList').innerHTML = bans.map((b) =>
+      '<li class="ban-item' + (b.n ? '' : ' empty') + '">' +
+      '<span class="ban-dot"></span>' +
+      '<span class="ban-class">' + esc(b.c) + '</span>' +
+      '<span class="ban-name">' + (b.n ? esc(b.n) : '无人可禁') + '</span>' +
+      '</li>').join('');
+  }
+
+  function updateBoxStatus() {
+    const el = $('#boxStatus');
+    if (!el) return;
+    if (!BOX) { el.textContent = '还没有识别结果。需要一台 Windows 电脑跑一次识别（点「怎么识别？」）；手机上可以先抽难度 / 分队 / 组合。'; return; }
+    el.textContent = '已识别 ' + (BOX.total || 0) + ' 名 · 六星 ' + (BOX.sixStar || 0) +
+      ' · 当前练度可禁选 ' + eligiblePool().length + ' 名（' + (BOX.generatedAt || '') + '）';
+  }
+
+  function renderBanChips() {
+    const wrap = $('#banClassChips');
+    if (!wrap) return;
+    wrap.innerHTML = CLASSES.map((c) =>
+      '<button type="button" class="chip" data-banclass="' + esc(c) + '" aria-pressed="' +
+      (S.ban.classes.indexOf(c) !== -1) + '">' + esc(c) + '</button>').join('');
+  }
+
+  function renderPool() {
+    const body = $('#poolBody');
+    const hint = $('#poolHint');
+    if (!body) return;
+    if (!BOX || !Array.isArray(BOX.operators)) {
+      body.innerHTML = '<p class="pool-empty">还没有识别结果。把截图放进 screenshots 文件夹，双击「识别box.bat」。</p>';
+      hint.textContent = '—';
+      return;
+    }
+    hint.textContent = '共 ' + BOX.total + ' 名 · 六星 ' + BOX.sixStar + ' · 高亮的是当前练度下能进禁选池的';
+    const html = CLASSES.map((c) => {
+      const ops = BOX.operators.filter((o) => o.rarity === 5 && o.class === c)
+        .sort((a, b) => (b.level || 0) - (a.level || 0));
+      if (!ops.length) return '';
+      return '<div class="pool-class"><h4>' + esc(c) + '<span>' + ops.length + '</span></h4>' +
+        '<div class="pool-ops">' + ops.map((o) =>
+          '<span class="pool-op ' + ((o.level || 0) >= S.ban.minLevel ? 'elig' : 'noelig') + '">' +
+          esc(o.name) + '<span class="lv">Lv' + (o.level || '?') + '</span></span>').join('') +
+        '</div></div>';
+    }).join('');
+    body.innerHTML = html || '<p class="pool-empty">没有六星干员。</p>';
+  }
+
+  /* ---------------- 文案 ---------------- */
+  function comboLine(c, roll) {
+    if (c.id === 'suixin' && roll) return roll.join(' / ');
+    return c.classes.join(' / ');
+  }
+
+  function buildText(res) {
+    const d = DIFF_BY_V.get(res.diff) || D.difficulties[0];
+    const s = SQUAD_BY_ID.get(res.squad) || D.squads[0];
+    const c = COMBO_BY_ID.get(res.combo) || D.combos[0];
+    const lines = [
+      '【' + D.meta.theme + ' · 开局抽签】',
+      '难度　保密等级·' + d.v + '（敌人难度 ' + d.enemy + ' / 得分 +' + d.score + '%）',
+      '分队　' + s.name,
+      '招募　' + c.name + '：' + comboLine(c, res.comboRoll),
+    ];
+    if (res.house) lines.push('房规　' + res.house);
+    if (res.bans && res.bans.length) {
+      lines.push('禁选　' + res.bans.map((b) => b.c + ' ' + (b.n || '—')).join(' / '));
+    }
+    lines.push('编号　#' + res.id);
+    return lines.join('\n');
+  }
+
+  /* ---------------- 复制 / 提示 ---------------- */
+  let toastTimer = null;
+  function toast(msg) {
+    const el = $('#toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
+  function copyText(text) {
+    const done = (ok) => toast(ok ? '已复制，去群里喊人开局吧' : '复制失败，手动选中文本吧');
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => done(true)).catch(() => done(fallbackCopy(text)));
+      return;
+    }
+    done(fallbackCopy(text));
+  }
+
+  function fallbackCopy(text) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) { return false; }
+  }
+
+  /* ---------------- 抽屉 / 记录 ---------------- */
+  function openDrawer() {
+    $('#drawer').classList.add('open');
+    $('#drawer').setAttribute('aria-hidden', 'false');
+    $('#scrim').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    $('#drawer').classList.remove('open');
+    $('#drawer').setAttribute('aria-hidden', 'true');
+    $('#scrim').hidden = true;
+    if ($('#historyModal').hidden) document.body.style.overflow = '';
+  }
+
+  function openHistory() {
+    renderHistory();
+    $('#historyModal').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeHistory() {
+    $('#historyModal').hidden = true;
+    if (!$('#drawer').classList.contains('open')) document.body.style.overflow = '';
+  }
+
+  function renderHistory() {    const list = $('#historyList');
+    if (!S.history.length) {
+      list.innerHTML = '<li class="history-empty">还没抽过签。按空格试试？</li>';
+      return;
+    }
+    list.innerHTML = S.history.map((h, i) => {
+      const d = DIFF_BY_V.get(h.diff);
+      const s = SQUAD_BY_ID.get(h.squad);
+      const c = COMBO_BY_ID.get(h.combo);
+      if (!d || !s || !c) return '';
+      const t = new Date(h.at);
+      const hh = String(t.getHours()).padStart(2, '0');
+      const mm = String(t.getMinutes()).padStart(2, '0');
+      return '<li><button type="button" class="hist-item" data-idx="' + i + '">' +
+        '<span class="hist-time">' + hh + ':' + mm + '</span>' +
+        '<span class="hist-main">难度 <span class="hl">' + d.v + '</span> · ' + esc(s.name) + ' · ' + esc(c.name) + '</span>' +
+        '<span class="hist-id">#' + esc(h.id || '------') + '</span>' +
+        '</button></li>';
+    }).join('');
+  }
+
+  /* ---------------- 干员禁选 UI ---------------- */
+  function syncBanUI() {
+    const chk = $('#chkBan');
+    if (!chk) return;
+    chk.checked = S.ban.enabled;
+    let idx = BAN_LV_STOPS.findIndex((v) => v >= S.ban.minLevel);
+    if (idx < 0) idx = BAN_LV_STOPS.length - 1;
+    $('#rngBanLv').value = String(idx);
+    $('#outBanLv').textContent = String(S.ban.minLevel);
+    renderBanChips();
+    updateBoxStatus();
+  }
+
+  function openPool() {
+    renderPool();
+    $('#poolModal').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closePool() {
+    $('#poolModal').hidden = true;
+    if (!$('#drawer').classList.contains('open') && $('#historyModal').hidden) {
+      document.body.style.overflow = '';
+    }
+  }
+  function openHow() {
+    $('#howModal').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeHow() {
+    $('#howModal').hidden = true;
+    if (!$('#drawer').classList.contains('open') && $('#historyModal').hidden && $('#poolModal').hidden) {
+      document.body.style.overflow = '';
+    }
+  }
+
+  function applyBanChange() {
+    if (S.current) {
+      S.current.bans = pickBans();
+      paintResult(S.current, false);
+    }
+    updateBoxStatus();
+    if (!$('#poolModal').hidden) renderPool();
+    save();
+  }
+
+  /* ---------------- 绑定 ---------------- */
+  function on(id, ev, fn) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener(ev, fn);
+  }
+
+  function bindUI() {
+    on('btnRoll', 'click', roll);
+    on('btnCopy', 'click', () => {
+      if (!S.current) { toast('先抽一次再复制'); return; }
+      copyText(buildText(S.current));
+    });
+    on('btnSettings', 'click', openDrawer);
+    on('btnCloseDrawer', 'click', closeDrawer);
+    on('scrim', 'click', closeDrawer);
+    on('btnHistory', 'click', openHistory);
+    on('btnCloseHistory', 'click', closeHistory);
+    on('historyModal', 'click', (e) => { if (e.target.id === 'historyModal') closeHistory(); });
+
+    /* 锁定 */
+    $$('.lock-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.lock;
+        if (!S.current) { toast('先抽一次，再锁定这一项'); return; }
+        S.locks[key] = !S.locks[key];
+        renderLocks();
+        updateConstraintLine();
+        save();
+      });
+    });
+
+    /* 难度滑杆 */
+    on('rngMin', 'input', () => {
+      let v = clamp(+$('#rngMin').value, 0, MAX_D);
+      if (v > S.diffMax) S.diffMax = v;
+      S.diffMin = v;
+      syncRangeInputs();
+      updateConstraintLine();
+      save();
+    });
+    on('rngMax', 'input', () => {
+      let v = clamp(+$('#rngMax').value, 0, MAX_D);
+      if (v < S.diffMin) S.diffMin = v;
+      S.diffMax = v;
+      syncRangeInputs();
+      updateConstraintLine();
+      save();
+    });
+
+    /* 预设 */
+    $$('#presetRow button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const p = btn.dataset.preset;
+        if (p === 'easy') { S.diffMin = 0; S.diffMax = 6; }
+        if (p === 'std') { S.diffMin = 0; S.diffMax = 12; }
+        if (p === 'hard') { S.diffMin = 10; S.diffMax = MAX_D; }
+        if (p === 'all') { S.diffMin = 0; S.diffMax = MAX_D; }
+        syncRangeInputs();
+        updateConstraintLine();
+        save();
+      });
+    });
+
+    /* 分队 chips */
+    $('#squadChips').addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      toggleExclude('squad', chip.dataset.squad);
+    });
+
+    $('#comboChips').addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      toggleExclude('combo', chip.dataset.combo);
+    });
+
+    /* chip 工具栏 */
+    $$('.chip-tools button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const k = btn.dataset.chip;
+        if (!k) return;
+        if (k === 'all') setExcluded('squad', []);
+        if (k === 'none') setExcluded('squad', D.squads.map((s) => s.id));
+        if (k === 'invert') {
+          const inv = D.squads.filter((s) => S.excludedSquads.indexOf(s.id) === -1).map((s) => s.id);
+          if (inv.length >= D.squads.length) { toast('全排除没法抽签，至少要留一个'); }
+          else S.excludedSquads = inv;
+        }
+        if (k === 'reset') S.excludedSquads = DEFAULT_EXCLUDED_SQUADS.slice();
+        if (k === 'all-c') setExcluded('combo', []);
+        if (k === 'none-c') setExcluded('combo', D.combos.map((c) => c.id));
+        if (k === 'reset-c') S.excludedCombos = DEFAULT_EXCLUDED_COMBOS.slice();
+        refreshChipStates();
+      });
+    });
+
+    /* 房规 */
+    on('chkHouse', 'change', () => {
+      S.house = $('#chkHouse').checked;
+      updateConstraintLine();
+      save();
+      if (S.current && !S.rolling) {
+        /* 立即给当前结果补一条 / 去掉一条，体验更顺 */
+        if (S.house && !S.current.house) S.current.house = pick(D.houseRules);
+        if (!S.house) S.current.house = null;
+        paintResult(S.current, false);
+        save();
+      }
+    });
+
+    /* 干员禁选 */
+    on('chkBan', 'change', () => {
+      S.ban.enabled = $('#chkBan').checked;
+      applyBanChange();
+    });
+
+    on('rngBanLv', 'input', () => {
+      const v = BAN_LV_STOPS[clamp(+$('#rngBanLv').value, 0, BAN_LV_STOPS.length - 1)];
+      S.ban.minLevel = v;
+      $('#outBanLv').textContent = String(v);
+      applyBanChange();
+    });
+
+    if ($('#banClassChips')) {
+      $('#banClassChips').addEventListener('click', (e) => {
+        const chip = e.target.closest('.chip');
+        if (!chip) return;
+        const c = chip.dataset.banclass;
+        const i = S.ban.classes.indexOf(c);
+        if (i === -1) S.ban.classes.push(c);
+        else {
+          if (S.ban.classes.length === 1) { toast('至少留一个职业'); return; }
+          S.ban.classes.splice(i, 1);
+        }
+        renderBanChips();
+        applyBanChange();
+      });
+    }
+
+    on('btnOpenPool', 'click', openPool);
+    on('btnClosePool', 'click', closePool);
+    on('poolModal', 'click', (e) => { if (e.target.id === 'poolModal') closePool(); });
+    on('btnBanHelp', 'click', openHow);
+    on('btnCloseHow', 'click', closeHow);
+    on('howModal', 'click', (e) => { if (e.target.id === 'howModal') closeHow(); });
+
+    /* 重置 */
+    on('btnReset', 'click', () => {
+      const d = defaults();
+      Object.assign(S, d);
+      S.locks = d.locks;
+      renderChips();
+      renderLocks();
+      syncRangeInputs();
+      renderHousePool();
+      syncBanUI();
+      updateConstraintLine();
+      save();
+      toast('已恢复默认约束');
+    });
+
+    on('btnClearHistory', 'click', () => {
+      S.history = [];
+      renderHistory();
+      save();
+      toast('记录已清空');
+    });
+
+    /* 记录点击复制 */
+    $('#historyList').addEventListener('click', (e) => {
+      const item = e.target.closest('.hist-item');
+      if (!item) return;
+      const h = S.history[+item.dataset.idx];
+      if (h) copyText(h.text);
+    });
+
+    /* 键盘 */
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { closeDrawer(); closeHistory(); closePool(); closeHow(); return; }
+      if (e.code !== 'Space' || e.repeat) return;
+      const t = document.activeElement;
+      const tag = t ? t.tagName : '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (tag === 'BUTTON' && t.id !== 'btnRoll') return;
+      e.preventDefault();
+      roll();
+    });
+  }
+
+  function toggleExclude(kind, id) {
+    const arr = kind === 'squad' ? S.excludedSquads : S.excludedCombos;
+    const all = kind === 'squad' ? D.squads : D.combos;
+    const i = arr.indexOf(id);
+    if (i === -1) {
+      if (arr.length >= all.length - 1) { toast('至少留一个可选项，不然抽不出来'); return; }
+      arr.push(id);
+    } else {
+      arr.splice(i, 1);
+    }
+    refreshChipStates();
+  }
+
+  function setExcluded(kind, ids) {
+    const arr = kind === 'squad' ? S.excludedSquads : S.excludedCombos;
+    const all = kind === 'squad' ? D.squads : D.combos;
+    if (ids.length >= all.length) { toast('全排除没法抽签，至少要留一个'); return; }
+    arr.length = 0;
+    ids.forEach((id) => arr.push(id));
+  }
+
+  function refreshChipStates() {
+    $$('#squadChips .chip').forEach((chip) => {
+      chip.setAttribute('aria-pressed', S.excludedSquads.indexOf(chip.dataset.squad) === -1 ? 'true' : 'false');
+    });
+    $$('#comboChips .chip').forEach((chip) => {
+      chip.setAttribute('aria-pressed', S.excludedCombos.indexOf(chip.dataset.combo) === -1 ? 'true' : 'false');
+    });
+    updateCounts();
+    updateConstraintLine();
+    save();
+  }
+
+  /* ---------------- 启动 ---------------- */
+  function init() {
+    load();
+    renderChips();
+    renderHousePool();
+    syncBanUI();
+    buildGauge();
+    syncRangeInputs();
+    renderLocks();
+    renderFooter(S.current);
+    updateConstraintLine();
+    bindUI();
+
+    if (S.current) {
+      paintResult(S.current, false);
+    } else {
+      renderFooter(null);
+      setTimeout(roll, 420);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+</script>
+</body>
+</html>
